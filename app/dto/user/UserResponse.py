@@ -7,7 +7,7 @@ class GenderEnum(str, Enum):
     F = "F"
 
 
-class PurposeEnum(str, Enum):
+class GoalEnum(str, Enum):
     balance = "balance"
     diet = "diet"
     muscle = "muscle"
@@ -19,7 +19,7 @@ class CreateUserResponse(BaseModel):
     gender: GenderEnum
     age_group: int
     nickname: str
-    purpose: PurposeEnum
+    goal: GoalEnum
 
 
 class GetUserInfoResponse(BaseModel):
@@ -27,11 +27,11 @@ class GetUserInfoResponse(BaseModel):
     gender: GenderEnum
     age_group: int
     nickname: str
-    purpose: PurposeEnum
+    goal: GoalEnum
 
 
 class EditUserInfoResponse(BaseModel):
     gender: GenderEnum
     age_group: int
     nickname: str
-    purpose: PurposeEnum
+    goal: GoalEnum
