@@ -3,7 +3,7 @@ from typing import List
 from enum import Enum
 
 
-class PurposeEnum(str, Enum):
+class GoalEnum(str, Enum):
     balance = "balance"
     diet = "diet"
     muscle = "muscle"
@@ -33,11 +33,11 @@ class PostFeed(BaseModel):
     meal_time: MealTimeEnum = Field(..., title="식사 종류", description="B,L,D,S")
     date: str = Field(..., title="식사 날짜")
     foods: List[Food] = Field(..., title="먹은 음식")
-    open: int = Field(..., title="공개 여부", description="0 or 1")
+    open: bool = Field(..., title="공개 여부", description="True or False")
 
 
 class PatchFeedData(BaseModel):
     meal_time: MealTimeEnum = Field(..., title="식사 종류", description="B,L,D,S")
     date: str = Field(..., title="식사 날짜")
     foods: List[Food] = Field(..., title="먹은 음식들")
-    open: int = Field(..., title="공개 여부", description="0 or 1")
+    open: bool = Field(..., title="공개 여부", description="True or False")

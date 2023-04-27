@@ -15,6 +15,7 @@ router = APIRouter(
     "",
     description="피드 작성",
     response_model=None,
+    tags=["feed"],
 )
 def post_feed(req: PostFeed) -> str:
     pass
@@ -24,9 +25,10 @@ def post_feed(req: PostFeed) -> str:
     "",
     description="전체 피드 조회",
     response_model=List[FeedData],
+    tags=["feed"],
 )
 def get_feeds(
-    purpose: PurposeEnum,
+    goal: GoalEnum,
     filter: FilterEnum = "newest",
     page: int = 1,
     per_page: int = 7,
@@ -38,6 +40,7 @@ def get_feeds(
     "/{feed_id}",
     description="상세 피드 조회",
     response_model=FeedData,
+    tags=["feed"],
 )
 def get_feed_by_id(feed_id: int):
     pass
@@ -47,6 +50,7 @@ def get_feed_by_id(feed_id: int):
     "/{feed_id}",
     description="피드 수정",
     response_model=FeedData,
+    tags=["feed"],
 )
 def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
     pass
@@ -56,6 +60,7 @@ def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
     "/{feed_id}",
     description="피드 삭제",
     response_model=None,
+    tags=["feed"],
 )
 def delete_feed_by_id(feed_id: int):
     pass
@@ -65,6 +70,7 @@ def delete_feed_by_id(feed_id: int):
     "/likes/{feed_id}",
     description="좋아요 토글",
     response_model=None,
+    tags=["feed"],
 )
 def patch_likes_by_id(feed_id: int):
     pass
@@ -74,6 +80,7 @@ def patch_likes_by_id(feed_id: int):
     "/likes",
     description="내가 좋아요한 피드",
     response_model=List[FeedData],
+    tags=["feed"],
 )
 def get_my_likes():
     pass

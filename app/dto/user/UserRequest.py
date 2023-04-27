@@ -8,7 +8,7 @@ class GenderEnum(str, Enum):
     F = "F"
 
 
-class PurposeEnum(str, Enum):
+class GoalEnum(str, Enum):
     balance = "balance"
     diet = "diet"
     muscle = "muscle"
@@ -21,7 +21,7 @@ class CreateUserRequest(BaseModel):
     gender: GenderEnum = Field(..., title="성별")
     age_group: int = Field(..., gt=0, lt=10, title="연령대")
     nickname: str = Field(..., title="사용자 닉네임")
-    purpose: PurposeEnum = Field(..., title="목표설정")
+    goal: GoalEnum = Field(..., title="목표설정")
 
 
 class CurrentUserId(BaseModel):
@@ -32,7 +32,7 @@ class EditUserInfoRequest(BaseModel):
     gender: Optional[GenderEnum] = Field(..., title="성별")
     age_group: Optional[int] = Field(..., gt=0, lt=10, title="연령대")
     nickname: Optional[str] = Field(..., title="사용자 닉네임")
-    purpose: Optional[PurposeEnum] = Field(..., title="목표설정")
+    goal: Optional[GoalEnum] = Field(..., title="목표설정")
 
 
 class CheckPasswordRequest(BaseModel):

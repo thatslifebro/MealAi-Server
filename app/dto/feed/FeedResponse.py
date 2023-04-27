@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List
-from app.dto.feed.FeedRequest import Food, MealTimeEnum, PurposeEnum
-from enum import Enum
+from app.dto.feed.FeedRequest import Food, MealTimeEnum, GoalEnum
 
 
 class FeedData(BaseModel):
@@ -19,5 +18,5 @@ class FeedData(BaseModel):
     foods: List[Food] = Field(..., title="먹은 음식들")
     created_at: str = Field(..., title="생성 일자")
     updated_at: str = Field(..., title="수정 일자")
-    open: int = Field(..., title="공개 여부", description="0 or 1")
-    purpose: PurposeEnum = Field(..., title="피드 카테고리")
+    open: bool = Field(..., title="공개 여부", description="True or False")
+    goal: GoalEnum = Field(..., title="피드 카테고리")
