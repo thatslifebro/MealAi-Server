@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - dev/server
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DOMAIN }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: 22
+        script: |
+          cd /home/elice/MealAi-Server
+          git pull
+          pip3 install -r requirements.txt
+          sudo systemctl restart gunicorn
