@@ -1,15 +1,5 @@
-from app.dto.user.UserRequest import (
-    CreateUserRequest,
-    EditUserInfoRequest,
-    CurrentUserId,
-    ChangePasswordRequest,
-    CheckPasswordRequest,
-)
-from app.dto.user.UserResponse import (
-    CreateUserResponse,
-    GetUserInfoResponse,
-    EditUserInfoResponse,
-)
+from app.dto.user.UserRequest import *
+from app.dto.user.UserResponse import *
 from fastapi import APIRouter
 
 router = APIRouter(
@@ -46,7 +36,7 @@ async def change_password(request: ChangePasswordRequest, user_id: CurrentUserId
 @router.post(
     "/check_password", description="현재 비밀번호 확인", response_model=None, tags=["user"]
 )
-async def check_password(user_id: CurrentUserId):
+async def check_password(request: CheckPasswordRequest):
     pass
 
 
