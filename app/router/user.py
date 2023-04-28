@@ -1,7 +1,7 @@
 from typing import List
 
 from sqlalchemy.orm import Session
-from app.database import crud
+from app.dao import user
 from app.database import schemas
 from app.database.database import SessionLocal
 from app.dto.user.UserRequest import *
@@ -23,7 +23,7 @@ def get_db():
 
 @router.get("/db", description="모든 유저 DB 조회 연습", response_model=List[schemas.User])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
+    users = user.get_users(db, skip=skip, limit=limit)
     return users
 
 
