@@ -1,10 +1,30 @@
+from typing import List
+
+from sqlalchemy.orm import Session
+from app.database import crud
+from app.database import schemas
+from app.database.database import SessionLocal
 from app.dto.user.UserRequest import *
 from app.dto.user.UserResponse import *
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 router = APIRouter(
     prefix="/api/users",
 )
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@router.get("/db", description="모든 유저 DB 조회 연습", response_model=List[schemas.User])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    return users
 
 
 @router.post("", description="회원가입", response_model=CreateUserResponse, tags=["user"])

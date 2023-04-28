@@ -1,6 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from typing import List
 from fastapi_sqlalchemy import DBSessionMiddleware
+from sqlalchemy.orm import Session
+from app.database import models, crud, schemas
+from app.database.database import engine, SessionLocal
 from app.router import user, feed, auth
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
