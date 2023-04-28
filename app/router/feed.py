@@ -67,7 +67,7 @@ def delete_feed_by_id(feed_id: int):
 
 
 @router.patch(
-    "/likes/{feed_id}",
+    "/like.py/{feed_id}",
     description="좋아요 토글",
     response_model=None,
     tags=["feed"],
@@ -77,7 +77,7 @@ def patch_likes_by_id(feed_id: int):
 
 
 @router.get(
-    "/likes",
+    "/like.py",
     description="내가 좋아요한 피드",
     response_model=List[FeedData],
     tags=["feed"],

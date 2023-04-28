@@ -20,3 +20,4 @@ class FeedData(BaseModel):
     updated_at: str = Field(..., title="수정 일자")
     open: bool = Field(..., title="공개 여부", description="True or False")
     goal: GoalEnum = Field(..., title="피드 카테고리")
+    my_like: bool = Field(..., title="좋아요 여부", description="True or False")
