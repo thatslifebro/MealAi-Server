@@ -4,7 +4,7 @@ from typing import List
 from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
 from enum import Enum
-
+from app.service.feed import *
 
 router = APIRouter(
     prefix="/api/feeds",
@@ -14,36 +14,36 @@ router = APIRouter(
 @router.post(
     "",
     description="피드 작성",
-    response_model=None,
+    # response_model=None,
     tags=["feed"],
 )
 def post_feed(req: PostFeed) -> str:
-    pass
+    return service_post_feed(req)
 
 
 @router.get(
     "",
     description="전체 피드 조회",
-    response_model=List[FeedData],
+    # response_model=List[FeedData],
     tags=["feed"],
 )
 def get_feeds(
-    goal: GoalEnum,
+    goal: GoalEnum = "balance",
     filter: FilterEnum = "newest",
     page: int = 1,
     per_page: int = 7,
 ):
-    pass
+    return service_get_feeds(page, per_page)
 
 
 @router.get(
     "/{feed_id}",
     description="상세 피드 조회",
-    response_model=FeedData,
+    # response_model=FeedData,
     tags=["feed"],
 )
 def get_feed_by_id(feed_id: int):
-    pass
+    return service_get_feed_by_id(feed_id)
 
 
 @router.patch(
