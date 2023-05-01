@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # :smiley: Team08 Server Repository
 
 8팀 서버 저장소입니다.
@@ -52,3 +53,7 @@
 [자주 사용되는 Git 명령어](https://www.holaxprogramming.com/2018/11/01/git-commands/)
 
 [프로젝트 fork 하는 법](https://salix97.tistory.com/223)
+=======
+# Server
+
+>>>>>>> 7b0e51e (Initial commit)
