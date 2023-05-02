@@ -8,10 +8,10 @@ database.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.add_middleware(
-    DBSessionMiddleware,
-    db_url="mysql+pymysql://root:team0808@elice08.cxtpwdmgwcgb.ap-northeast-2.rds.amazonaws.com:3306/test",
-)
+# app.add_middleware(
+#     DBSessionMiddleware,
+#     db_url="mysql+pymysql://root:team0808@elice08.cxtpwdmgwcgb.ap-northeast-2.rds.amazonaws.com:3306/test",
+# )
 
 
 app.include_router(auth.router)
