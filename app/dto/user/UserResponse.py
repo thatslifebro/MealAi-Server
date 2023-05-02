@@ -16,10 +16,7 @@ class GoalEnum(str, Enum):
 
 class CreateUserResponse(BaseModel):
     email: EmailStr
-    gender: GenderEnum
-    age_group: int
     nickname: str
-    goal: GoalEnum
 
 
 class GetUserInfoResponse(BaseModel):
