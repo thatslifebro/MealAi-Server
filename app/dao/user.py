@@ -1,11 +1,32 @@
-from sqlalchemy.orm import Session
-
-from app.model import feed, like, user
-
-
-def get_user(db: Session, user_id: int):
-    return db.query(user.User).filter(user.User.id == user_id).first()
+from app.database.database import engine
+from sqlalchemy.sql import text
+from app.dto.user.UserRequest import CreateUserRequest
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(user.User).offset(skip).limit(limit).all()
+async def create(user: CreateUserRequest):
+    with engine.connect() as conn:
+        statement = text(
+            """INSERT INTO User (email, password, gender, age_group, nickname, goal) VALUES (:email, :password, :gender, :age_group, :nickname, :goal)"""
+        )
+
+        values = {
+            "email": user.email,
+            "password": user.password,
+            "gender": user.gender.value,
+            "age_group": user.age_group,
+            "nickname": user.nickname,
+            "goal": user.goal.value,
+        }
+
+        conn.execute(statement, values)
+        return None
+
+
+async def read_by_email(email: str):
+    with engine.connect() as conn:
+        statement = text("""SELECT * FROM User WHERE email = :email""")
+        res = conn.execute(statement, {"email": email})
+        user = res.fetchone()
+        if not user:
+            return None
+        return user

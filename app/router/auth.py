@@ -18,5 +18,5 @@ async def logout():
 
 
 @router.post("/refresh", description="토큰 만료시 갱신", response_model=None, tags=["auth"])
-async def logout():
+async def refresh():
     pass
