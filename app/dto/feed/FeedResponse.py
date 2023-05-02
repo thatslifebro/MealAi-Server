@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel, Field
 from typing import List
 from app.dto.feed.FeedRequest import Food, MealTimeEnum, GoalEnum
@@ -8,8 +10,10 @@ class FeedData(BaseModel):
     user_id: int = Field(..., title="작성자 ID")
     image_url: str = Field(..., title="전체 이미지 URL")
     user_name: str = Field(..., title="작성자 이름")
-    meal_time: MealTimeEnum = Field(..., title="식사 종류", description="B,L,D,S")
-    date: str = Field(..., title="식사 날짜")
+    meal_time: MealTimeEnum = Field(
+        ..., title="식사 종류", description="balance,lunch,dinner,snack"
+    )
+    date: datetime.date = Field(..., title="식사 날짜")
     likes: int = Field(..., title="좋아요 수")
     kcal: float = Field(..., title="전체 열량")
     carbohydrate: float = Field(..., title="전체 탄수화물")

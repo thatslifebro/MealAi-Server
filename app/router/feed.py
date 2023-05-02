@@ -14,7 +14,7 @@ router = APIRouter(
 @router.post(
     "",
     description="피드 작성",
-    # response_model=None,
+    response_model=str,
     tags=["feed"],
 )
 def post_feed(req: PostFeed) -> str:
@@ -39,7 +39,7 @@ def get_feeds(
 @router.get(
     "/{feed_id}",
     description="상세 피드 조회",
-    # response_model=FeedData,
+    response_model=FeedData,
     tags=["feed"],
 )
 def get_feed_by_id(feed_id: int):
