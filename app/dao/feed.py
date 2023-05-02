@@ -40,6 +40,7 @@ def post_feed(post_feed_data, foods_data):
         conn.execute(statement, post_feed_data)
         conn.commit()
 
+        # 최근 insert 한 row 의 id 가져오기.
         statement = text("""SELECT LAST_INSERT_ID()""")
         result = conn.execute(statement)
         feed_id = result.mappings().first()["LAST_INSERT_ID()"]
@@ -58,5 +59,19 @@ def post_feed(post_feed_data, foods_data):
 
             conn.execute(statement, post_food_data)
             conn.commit()
+
+        return "ok"
+
+
+def delete_feed(feed_id: int):
+    with engine.connect() as conn:
+        data = ({"feed_id": feed_id},)
+        statement = text("""DELETE FROM Feed WHERE feed_id = :feed_id""")
+        conn.execute(statement, data)
+        conn.commit()
+
+        statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
+        conn.execute(statement, data)
+        conn.commit()
 
         return "ok"
