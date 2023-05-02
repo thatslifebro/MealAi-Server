@@ -1,9 +1,5 @@
-from sqlalchemy.orm import Session
 from app.database.database import engine
 from sqlalchemy.sql import text
-
-from app.dto.feed.FeedRequest import PostFeed
-from app.model import feed, like, user
 
 
 def get_feed(feed_id: int):
