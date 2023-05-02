@@ -1,20 +1,18 @@
 from sqlalchemy import (
-    Boolean,
     Column,
     ForeignKey,
-    Date,
     Integer,
-    String,
-    DateTime,
-    Float,
 )
-from sqlalchemy.dialects.mysql import VARCHAR
-import datetime
+from sqlalchemy.orm import relationship
+
 from app.database.database import Base
 
 
 class Likes(Base):
     __tablename__ = "Likes"
 
-    feed_id = Column(ForeignKey("Feed.feed_id"), primary_key=True)
-    user_id = Column(ForeignKey("User.user_id"), primary_key=True)
+    feed_id = Column(Integer, ForeignKey("Feed.feed_id"), primary_key=True)
+    user_id = Column(Integer, ForeignKey("User.user_id"), primary_key=True)
+
+    user = relationship("User", back_populates="Likes")
+    feed = relationship("Feed", back_populates="Likes")
