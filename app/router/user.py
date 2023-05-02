@@ -7,6 +7,7 @@ from app.database.database import SessionLocal
 from app.dto.user.UserRequest import *
 from app.dto.user.UserResponse import *
 from fastapi import APIRouter, Depends
+from app.service.user import UserService
 
 router = APIRouter(
     prefix="/api/users",
@@ -29,7 +30,8 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @router.post("", description="회원가입", response_model=CreateUserResponse, tags=["user"])
 async def register(request: CreateUserRequest):
-    pass
+    await UserService().register(request)
+    return CreateUserResponse(email=request.email, nickname=request.nickname)
 
 
 @router.get(
