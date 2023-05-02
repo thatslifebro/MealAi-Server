@@ -75,3 +75,34 @@ def delete_feed(feed_id: int):
         conn.commit()
 
         return "ok"
+
+
+def patch_feed(feed_id: int, patch_feed_data, foods_data):
+    with engine.connect() as conn:
+        data = ({"feed_id": feed_id},)
+        statement = text(
+            """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=feed_id"""
+        )
+        conn.execute(statement, patch_feed_data)
+        conn.commit()
+
+        statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
+        conn.execute(statement, data)
+        conn.commit()
+
+        for food_data in foods_data:
+            post_food_data = {
+                "food_id": food_data.food_id,
+                "image_url": food_data.image_url,
+                "weight": food_data.weight,
+                "is_deleted": 0,
+                "feed_id": feed_id,
+            }
+            statement = text(
+                """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
+            )
+
+            conn.execute(statement, post_food_data)
+            conn.commit()
+
+        return "ok"
