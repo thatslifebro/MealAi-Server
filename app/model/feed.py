@@ -51,7 +51,7 @@ class FoodInfo(Base):
     fat = Column(Numeric(precision=7, scale=2), nullable=False)
 
 
-class FeedFoods(Base):
+class FeedFood(Base):
     __tablename__ = "FeedFood"
 
     feed_id = Column(Integer, ForeignKey("Feed.feed_id"), primary_key=True)
@@ -63,4 +63,4 @@ class FeedFoods(Base):
     is_deleted = Column(Boolean, default=0)
 
     food = relationship("FoodInfo", back_populates="FeedFood")
-    feed = relationship("Feed", back_populates="FeedFood")
+    feed = relationship("Feed", cascade="delete", back_populates="FeedFood")
