@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi_sqlalchemy import DBSessionMiddleware
 from app.database import database
 from app.database.database import engine
-from app.router import user, feed, auth
+from app.router import user, feed, auth, report
 
 database.Base.metadata.create_all(bind=engine)
 
@@ -17,3 +17,4 @@ app = FastAPI()
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(feed.router)
+app.include_router(report.router)

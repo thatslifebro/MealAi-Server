@@ -1,67 +1,36 @@
+from app.dao.like import get_feed_likes
 from app.database.database import engine
 from sqlalchemy.sql import text
 
 
-def get_feed(feed_id: int):
+def get_feed_by_id(feed_id: int):
     with engine.connect() as conn:
         data = {"feed_id": feed_id}
-        statement = text("""SELECT COUNT(*) FROM Likes WHERE feed_id = :feed_id""")
-        likes = conn.execute(statement, data).scalar()
-
-        data = ({"feed_id": feed_id},)
         statement = text("""SELECT * FROM Feed WHERE feed_id = :feed_id""")
         result = conn.execute(statement, data)
         feed_data = result.mappings().first()
+        return feed_data
 
+
+def get_feed_food_by_id(feed_id: int):
+    with engine.connect() as conn:
+        data = {"feed_id": feed_id}
         statement = text("""SELECT * FROM FeedFood WHERE feed_id = :feed_id""")
         result = conn.execute(statement, data)
         feed_food_data = result.mappings().all()
-
-        kcal = 0
-        carbohydrate = 0
-        protein = 0
-        fat = 0
-
-        data_foods = []
-        data_feed = {}
-
-        for feed_food in feed_food_data:
-            data_food = {}
-            data = {"food_id": feed_food.food_id}
-            statement = text("""SELECT * FROM FoodInfo WHERE food_id = :food_id""")
-            result = conn.execute(statement, data)
-            food_info = result.mappings().first()
-            ratio = feed_food.weight / food_info.weight
-
-            nutrient = {
-                "kcal": food_info.kcal * ratio,
-                "carbohydrate": food_info.carbohydrate * ratio,
-                "protein": food_info.protein * ratio,
-                "fat": food_info.fat * ratio,
-            }
-
-            kcal += nutrient["kcal"]
-            carbohydrate += nutrient["carbohydrate"]
-            protein += nutrient["protein"]
-            fat += nutrient["fat"]
-
-            data_food.update(feed_food)
-            data_food.update(nutrient)
-            data_foods.append(data_food)
-
-        total_nutrient = {
-            "kcal": kcal,
-            "carbohydrate": carbohydrate,
-            "protein": protein,
-            "fat": fat,
-        }
-        data_feed.update(total_nutrient)
-        data_feed.update(feed_data)
-
-        return data_feed, data_foods, likes
+        return feed_food_data
 
 
-def get_feeds(skip: int = 0, limit: int = 10):
+def get_food_info_by_id(food_id: int):
+    with engine.connect() as conn:
+        data = {"food_id": food_id}
+        statement = text("""SELECT * FROM FoodInfo WHERE food_id = :food_id""")
+        result = conn.execute(statement, data)
+        food_info = result.mappings().first()
+        return food_info
+
+
+def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
         data = {"skip": skip, "limit": limit}
         statement = text(
@@ -69,65 +38,7 @@ def get_feeds(skip: int = 0, limit: int = 10):
         )
         result = conn.execute(statement, data)
         feeds = result.mappings().all()
-
-        array = []
-
-        for feed in feeds:
-            data = {"feed_id": feed.feed_id}
-            statement = text("""SELECT COUNT(*) FROM Likes WHERE feed_id = :feed_id""")
-            likes = conn.execute(statement, data).scalar()
-
-            data = {"feed_id": feed.feed_id}
-            statement = text("""SELECT * FROM FeedFood WHERE feed_id = :feed_id""")
-            result = conn.execute(statement, data)
-            feed_food_data = result.mappings().all()
-
-            kcal = 0
-            carbohydrate = 0
-            protein = 0
-            fat = 0
-
-            data_foods = []
-
-            for feed_food in feed_food_data:
-                data_food = {}
-                data = {"food_id": feed_food.food_id}
-                statement = text("""SELECT * FROM FoodInfo WHERE food_id = :food_id""")
-                result = conn.execute(statement, data)
-                food_info = result.mappings().first()
-                ratio = feed_food.weight / food_info.weight
-
-                nutrient = {
-                    "kcal": food_info.kcal * ratio,
-                    "carbohydrate": food_info.carbohydrate * ratio,
-                    "protein": food_info.protein * ratio,
-                    "fat": food_info.fat * ratio,
-                }
-
-                kcal += nutrient["kcal"]
-                carbohydrate += nutrient["carbohydrate"]
-                protein += nutrient["protein"]
-                fat += nutrient["fat"]
-
-                data_food.update(feed_food)
-                data_food.update(nutrient)
-                data_foods.append(data_food)
-
-            res = {
-                "foods": data_foods,
-                "user_name": "user_name",
-                "my_like": True,
-                "goal": "balance",
-                "kcal": kcal,
-                "carbohydrate": carbohydrate,
-                "protein": protein,
-                "fat": fat,
-                "likes": likes,
-            }
-            res.update(feed)
-            array.append(res)
-
-        return array
+        return feeds
 
 
 def post_feed(post_feed_data, foods_data):
@@ -139,70 +50,53 @@ def post_feed(post_feed_data, foods_data):
         conn.execute(statement, post_feed_data)
         conn.commit()
 
-        # 최근 insert 한 row 의 id 가져오기.
+
+def get_recent_post_id():
+    with engine.connect() as conn:
         statement = text("""SELECT LAST_INSERT_ID()""")
         result = conn.execute(statement)
         feed_id = result.mappings().first()["LAST_INSERT_ID()"]
+        return feed_id
 
-        for food_data in foods_data:
-            post_food_data = {
-                "food_id": food_data.food_id,
-                "image_url": food_data.image_url,
-                "weight": food_data.weight,
-                "is_deleted": 0,
-                "feed_id": feed_id,
-            }
-            statement = text(
-                """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
-            )
 
-            conn.execute(statement, post_food_data)
-            conn.commit()
+def insert_feed_food(feed_id, food_data):
+    with engine.connect() as conn:
+        post_food_data = {
+            "food_id": food_data.food_id,
+            "image_url": food_data.image_url,
+            "weight": food_data.weight,
+            "is_deleted": 0,
+            "feed_id": feed_id,
+        }
+        statement = text(
+            """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
+        )
 
-        return "ok"
+        conn.execute(statement, post_food_data)
+        conn.commit()
+
+
+def delete_feed_food(feed_id: int):
+    with engine.connect() as conn:
+        data = ({"feed_id": feed_id},)
+
+        statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
+        conn.execute(statement, data)
+        conn.commit()
 
 
 def delete_feed(feed_id: int):
     with engine.connect() as conn:
         data = ({"feed_id": feed_id},)
-
-        statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
-        conn.execute(statement, data)
-        conn.commit()
-
         statement = text("""DELETE FROM Feed WHERE feed_id = :feed_id""")
         conn.execute(statement, data)
         conn.commit()
 
-        return "ok"
 
-
-def patch_feed(feed_id: int, patch_feed_data, foods_data):
+def patch_feed(feed_id: int, patch_feed_data):
     with engine.connect() as conn:
-        data = ({"feed_id": feed_id},)
         statement = text(
             """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=feed_id"""
         )
         conn.execute(statement, patch_feed_data)
         conn.commit()
-
-        statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
-        conn.execute(statement, data)
-        conn.commit()
-
-        for food_data in foods_data:
-            post_food_data = {
-                "food_id": food_data.food_id,
-                "image_url": food_data.image_url,
-                "weight": food_data.weight,
-                "is_deleted": 0,
-                "feed_id": feed_id,
-            }
-            statement = text(
-                """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
-            )
-
-            conn.execute(statement, post_food_data)
-            conn.commit()
-
-        return "ok"

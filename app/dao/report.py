@@ -2,41 +2,21 @@ from app.database.database import engine
 from sqlalchemy.sql import text
 
 
-def get_feed_likes(feed_id: int):
+def get_report_week(week: int):
     with engine.connect() as conn:
-        data = {"feed_id": feed_id}
-        statement = text("""SELECT COUNT(*) FROM Likes WHERE feed_id = :feed_id""")
-        likes = conn.execute(statement, data).scalar()
-        return likes
-
-
-def patch_likes(feed_id: int, user_id: int):
-    with engine.connect() as conn:
-        data = {"feed_id": feed_id, "user_id": user_id}
-        statement = text(
-            """SELECT COUNT(*) FROM Likes WHERE feed_id = :feed_id AND user_id = :user_id"""
-        )
-        result = conn.execute(statement, data).scalar()
-
-        if result == 1:
+        statement = text("""SELECT MAX(WEEK(date,1)) FROM Feed""")
+        latest_week = conn.execute(statement).scalar()
+        search_week = latest_week
+        for i in range(week - 1):
+            data = {"search_week": search_week}
             statement = text(
-                """DELETE FROM Likes WHERE feed_id = :feed_id AND user_id = :user_id"""
+                """SELECT MAX(WEEK(date,1)) FROM Feed WHERE WEEK(date,1)<:search_week"""
             )
-            conn.execute(statement, data)
-            conn.commit()
-        else:
-            statement = text("""INSERT INTO Likes VALUES(:feed_id,:user_id)""")
-            conn.execute(statement, data)
-            conn.commit()
+            search_week = conn.execute(statement, data).scalar()
 
-        return "ok"
-
-
-def get_my_likes(user_id: int):
-    with engine.connect() as conn:
-        data = {"user_id": user_id}
+        data = {"search_week": search_week}
         statement = text(
-            """SELECT * FROM Feed AS F LEFT OUTER JOIN Likes AS L ON F.feed_id = L.feed_id WHERE L.user_id = :user_id"""
+            """SELECT * FROM Feed WHERE WEEK(date,1) = :search_week ORDER BY date"""
         )
         result = conn.execute(statement, data)
         feeds = result.mappings().all()

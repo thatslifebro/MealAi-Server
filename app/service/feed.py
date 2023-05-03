@@ -3,21 +3,115 @@ from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 
 
 def service_get_feed_by_id(feed_id: int):
-    feed_data, feed_food_data, likes = get_feed(feed_id)
+    likes = get_feed_likes(feed_id)
+    feed_data = get_feed_by_id(feed_id)
+    feed_food_data = get_feed_food_by_id(feed_id)
+
+    kcal = 0
+    carbohydrate = 0
+    protein = 0
+    fat = 0
+
+    data_foods = []
+    data_feed = {}
+
+    # food_info와 feed_food 비교하여 영양소 구하기
+    for feed_food in feed_food_data:
+        data_food = {}
+
+        food_info = get_food_info_by_id(feed_food.food_id)
+        ratio = feed_food.weight / food_info.weight
+
+        nutrient = {
+            "kcal": food_info.kcal * ratio,
+            "carbohydrate": food_info.carbohydrate * ratio,
+            "protein": food_info.protein * ratio,
+            "fat": food_info.fat * ratio,
+        }
+
+        kcal += nutrient["kcal"]
+        carbohydrate += nutrient["carbohydrate"]
+        protein += nutrient["protein"]
+        fat += nutrient["fat"]
+
+        data_food.update(feed_food)
+        data_food.update(nutrient)
+        data_foods.append(data_food)
+
+    total_nutrient = {
+        "kcal": kcal,
+        "carbohydrate": carbohydrate,
+        "protein": protein,
+        "fat": fat,
+    }
+    data_feed.update(total_nutrient)
+    data_feed.update(feed_data)
+
+    # my_like 는 인증기능 구현필요, user_name 도 goal 도
     res = {
-        "foods": feed_food_data,
+        "foods": data_foods,
         "user_name": "user_name",
         "my_like": True,
         "goal": "balance",
         "likes": likes,
     }
-    res.update(feed_data)
-    # my_like 는 인증기능 구현필요, user_name 도 goal 도
+    res.update(data_feed)
+
     return res
 
 
 def service_get_feeds(page: int, per_page: int):
-    return get_feeds(skip=(page - 1) * per_page, limit=per_page)
+    feeds = get_feeds_by_skip_limit(skip=(page - 1) * per_page, limit=per_page)
+
+    array = []
+
+    for feed in feeds:
+        likes = get_feed_likes(feed.feed_id)
+        feed_food_data = get_feed_food_by_id(feed.feed_id)
+
+        kcal = 0
+        carbohydrate = 0
+        protein = 0
+        fat = 0
+
+        data_foods = []
+
+        for feed_food in feed_food_data:
+            data_food = {}
+            food_info = get_food_info_by_id(feed_food.food_id)
+            ratio = feed_food.weight / food_info.weight
+
+            nutrient = {
+                "kcal": food_info.kcal * ratio,
+                "carbohydrate": food_info.carbohydrate * ratio,
+                "protein": food_info.protein * ratio,
+                "fat": food_info.fat * ratio,
+            }
+
+            kcal += nutrient["kcal"]
+            carbohydrate += nutrient["carbohydrate"]
+            protein += nutrient["protein"]
+            fat += nutrient["fat"]
+
+            data_food.update(feed_food)
+            data_food.update(nutrient)
+            data_foods.append(data_food)
+
+        res = {
+            "foods": data_foods,
+            "user_name": "user_name",
+            "my_like": True,
+            "goal": "balance",
+            "kcal": kcal,
+            "carbohydrate": carbohydrate,
+            "protein": protein,
+            "fat": fat,
+            "likes": likes,
+        }
+        res.update(feed)
+        array.append(res)
+
+    return array
 
 
 def service_post_feed(req: PostFeed):
@@ -36,16 +130,29 @@ def service_post_feed(req: PostFeed):
 
     foods_data = req.foods
 
-    return post_feed(post_feed_data, foods_data)
+    post_feed(post_feed_data, foods_data)
+
+    # 최근 insert 한 row 의 id 가져오기.
+    feed_id = get_recent_post_id()
+
+    for food_data in foods_data:
+        insert_feed_food(feed_id, food_data)
+
+    return "ok"
 
 
 def service_delete_feed(feed_id: int):
-    return delete_feed(feed_id)
+    delete_feed_food(feed_id)
+    delete_feed(feed_id)
+    return "ok"
 
 
 def service_patch_feed(feed_id: int, req: PatchFeedData):
     patch_feed_data = {"meal_time": req.meal_time, "open": req.open, "date": req.date}
     foods_data = req.foods
 
-    patch_feed(feed_id, patch_feed_data, foods_data)
+    patch_feed(feed_id, patch_feed_data)
+    delete_feed_food(feed_id)
+    insert_feed_food(foods_data)
+
     return service_get_feed_by_id(feed_id)
