@@ -1,4 +1,5 @@
 from app.dao.feed import *
+from app.dto.feed.FeedRequest import PostFeed
 
 
 def service_get_feed_by_id(feed_id: int):
