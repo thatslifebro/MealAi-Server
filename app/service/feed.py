@@ -1,19 +1,15 @@
 from app.dao.feed import *
-from app.dto.feed.FeedRequest import PostFeed
+from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 
 
 def service_get_feed_by_id(feed_id: int):
-    feed_data, feed_food_data = get_feed(feed_id)
+    feed_data, feed_food_data, likes = get_feed(feed_id)
     res = {
         "foods": feed_food_data,
         "user_name": "user_name",
         "my_like": True,
         "goal": "balance",
-        "kcal": 0,
-        "carbohydrate": 0,
-        "protein": 0,
-        "fat": 0,
-        "likes": 0,
+        "likes": likes,
     }
     res.update(feed_data)
     # my_like 는 인증기능 구현필요, user_name 도 goal 도
@@ -41,3 +37,15 @@ def service_post_feed(req: PostFeed):
     foods_data = req.foods
 
     return post_feed(post_feed_data, foods_data)
+
+
+def service_delete_feed(feed_id: int):
+    return delete_feed(feed_id)
+
+
+def service_patch_feed(feed_id: int, req: PatchFeedData):
+    patch_feed_data = {"meal_time": req.meal_time, "open": req.open, "date": req.date}
+    foods_data = req.foods
+
+    patch_feed(feed_id, patch_feed_data, foods_data)
+    return service_get_feed_by_id(feed_id)
