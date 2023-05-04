@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from app.service.report import *
 
 router = APIRouter(
-    prefix="/api/report",
+    prefix="/api/reports",
 )
 
 
@@ -13,4 +13,4 @@ router = APIRouter(
     tags=["report"],
 )
 def get_report_week(week: int):
-    return service_get_report_week(week)
+    return ReportService().service_get_report_week(week)
