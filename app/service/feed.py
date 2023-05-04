@@ -123,7 +123,7 @@ class FeedService:
             "date": req.date,
             "open": req.open,
             "feed_id": "null",  # auto increment
-            "user_id": "1",  # 유저 인증기능 구현 필요
+            "user_id": 3,  # 유저 인증기능 구현 필요
             "thumbnail_url": "abc",
             "created_at": "null",
             "updated_at": "null",

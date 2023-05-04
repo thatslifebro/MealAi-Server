@@ -7,7 +7,7 @@ class LikeService:
         ...
 
     def service_patch_likes_by_id(self, feed_id: int):
-        user_id = 1  # 유저인증 구현 후 지정
+        user_id = 3  # 유저인증 구현 후 지정
 
         result = get_feed_likes_user(feed_id, user_id)
 
@@ -19,7 +19,7 @@ class LikeService:
         return "ok"
 
     def service_get_my_likes(self):
-        user_id = 1  # 유저기능 구현 후 지정
+        user_id = 3  # 유저기능 구현 후 지정
         feeds = get_my_likes_feeds(user_id)
 
         array = []
