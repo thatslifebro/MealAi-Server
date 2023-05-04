@@ -24,10 +24,6 @@ class CreateUserRequest(BaseModel):
     goal: GoalEnum = Field(..., title="목표설정")
 
 
-class CurrentUserId(BaseModel):
-    user_id: int = Field(..., title="사용자 아이디")
-
-
 class EditUserInfoRequest(BaseModel):
     gender: Optional[GenderEnum] = Field(..., title="성별")
     age_group: Optional[int] = Field(..., gt=0, lt=10, title="연령대")

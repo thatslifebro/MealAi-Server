@@ -8,6 +8,7 @@ from app.dto.user.UserRequest import *
 from app.dto.user.UserResponse import *
 from fastapi import APIRouter, Depends
 from app.service.user import UserService
+from app.utils.depends import *
 
 router = APIRouter(
     prefix="/api/users",
@@ -37,16 +38,18 @@ async def register(request: CreateUserRequest):
 @router.get(
     "", description="회원정보 조회", response_model=GetUserInfoResponse, tags=["user"]
 )
-async def get_user_info():
-    user = await UserService().get_user_info(user_id=1)
+async def get_user_info(user_id: int = Depends(current_user_id)):
+    user = await UserService().get_user_info(user_id=user_id)
     return GetUserInfoResponse(**user)
 
 
 @router.patch(
     "", description="회원정보 수정", response_model=EditUserInfoResponse, tags=["user"]
 )
-async def edit_user_info(request: EditUserInfoRequest, user_id: CurrentUserId):
-    await UserService().edit_user_info(update=request, user_id=1)
+async def edit_user_info(
+    request: EditUserInfoRequest, user_id: int = Depends(current_user_id)
+):
+    await UserService().edit_user_info(update=request, user_id=user_id)
     res = request.dict()
     return EditUserInfoResponse(**res)
 
@@ -54,20 +57,24 @@ async def edit_user_info(request: EditUserInfoRequest, user_id: CurrentUserId):
 @router.patch(
     "/change_password", description="비밀번호 변경", response_model=str, tags=["user"]
 )
-async def change_password(request: ChangePasswordRequest, user_id: CurrentUserId):
-    await UserService().change_password(update=request, user_id=1)
+async def change_password(
+    request: ChangePasswordRequest, user_id: int = Depends(current_user_id)
+):
+    await UserService().change_password(update=request, user_id=user_id)
     return "변경완료"
 
 
 @router.post(
     "/check_password", description="현재 비밀번호 확인", response_model=str, tags=["user"]
 )
-async def check_password(request: CheckPasswordRequest, user_id: CurrentUserId):
-    await UserService().check_password(password=request, user_id=1)
+async def check_password(
+    request: CheckPasswordRequest, user_id: int = Depends(current_user_id)
+):
+    await UserService().check_password(password=request.password, user_id=user_id)
     return "확인완료"
 
 
 @router.delete("", description="회원 탈퇴", response_model=str, tags=["user"])
-async def delete_user(user_id: CurrentUserId):
-    await UserService().delete_user(user_id=10)
+async def delete_user(user_id: int = Depends(current_user_id)):
+    await UserService().delete_user(user_id=user_id)
     return "탈퇴완료"

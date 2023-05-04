@@ -1,9 +1,12 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from starlette.config import Config
 
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:team0808@elice08.cxtpwdmgwcgb.ap-northeast-2.rds.amazonaws.com:3306/test"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+config = Config(".env")
+
+
+SQLALCHEMY_DATABASE_URL = config("SQLALCHEMY_DATABASE_URL")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
