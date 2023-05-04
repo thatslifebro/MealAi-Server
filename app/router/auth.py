@@ -24,14 +24,19 @@ async def refresh():
 
 
 @router.post(
-    "/check_email", description="회원가입 시 이메일 인증", response_model=None, tags=["auth"]
+    "/check_email",
+    description="회원가입 시 이메일 인증",
+    response_model=EmailResponse,
+    tags=["auth"],
 )
-async def email_check():
-    pass
+async def check_email(email: EmailRequest):
+    res = await AuthService().send_mail_for_register(receiver_email=email.email)
+    return EmailResponse(authentication_number=res)
 
 
 @router.post(
-    "/reset_password", description="임시 비밀번호 발급", response_model=None, tags=["auth"]
+    "/reset_password", description="임시 비밀번호 발급", response_model=str, tags=["auth"]
 )
-async def reset_password():
-    pass
+async def reset_password(email: EmailRequest):
+    res = await AuthService().send_mail_for_reset_pw(receiver_email=email.email)
+    return "임시 비밀번호 발급 완료"

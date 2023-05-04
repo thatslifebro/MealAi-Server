@@ -1,7 +1,7 @@
 from app.dao.user import *
 from app.dto.user.UserRequest import *
 from app.dto.user.UserResponse import *
-
+from app.utils.hash_password import hash_password
 import bcrypt
 
 
@@ -13,7 +13,7 @@ class UserService:
         is_find = await read_by_email(user.email)
         if is_find:
             raise ValueError("중복된 email 입니다.")
-        user.password = self.hash_password(user.password)
+        user.password = hash_password(user.password)
         res = await create(user)
         return None
 
@@ -32,7 +32,7 @@ class UserService:
 
     async def change_password(self, user_id: int, update: ChangePasswordRequest):
         await self.check_password(user_id, update.current_password)
-        change_password = self.hash_password(update.change_password)
+        change_password = hash_password(update.change_password)
         res = await update_password(password=change_password, user_id=user_id)
         return None
 
@@ -51,10 +51,3 @@ class UserService:
         if not bcrypt.checkpw(password.encode("utf-8"), user.password):
             raise ValueError("현재 비밀번호가 일치하지 않습니다.")
         return None
-
-    def hash_password(self, password: str) -> bytes:
-        password_bytes = password.encode("utf-8")
-
-        hashed_bytes = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
-
-        return hashed_bytes
