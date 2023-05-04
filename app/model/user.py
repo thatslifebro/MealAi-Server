@@ -9,6 +9,7 @@ from sqlalchemy import (
     Enum,
     CheckConstraint,
     text,
+    BINARY,
 )
 from sqlalchemy.orm import relationship
 from _datetime import datetime
@@ -19,7 +20,7 @@ class User(Base):
     __tablename__ = "User"
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    password = Column(BINARY(60), nullable=False)
     gender = Column(Enum("M", "F"), nullable=False)
     age_group = Column(
         Integer,
