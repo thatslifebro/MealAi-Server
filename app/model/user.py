@@ -42,7 +42,7 @@ class UserDailyNutrient(Base):
     protein = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
     fat = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
 
-    user = relationship("User", back_populates="UserDailyNutrient")
+    user = relationship("User")
 
 
 class DailyNutrient(Base):

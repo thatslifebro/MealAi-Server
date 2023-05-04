@@ -1,10 +1,16 @@
 from fastapi import FastAPI
 from fastapi_sqlalchemy import DBSessionMiddleware
 from app.database import database
+from app.model import feed as model_feed
+from app.model import like as model_like
+from app.model import user as model_user
 from app.database.database import engine
 from app.router import user, feed, auth, report
 
-database.Base.metadata.create_all(bind=engine)
+model_feed.Base.metadata.create_all(bind=engine)
+model_user.Base.metadata.create_all(bind=engine)
+model_like.Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 

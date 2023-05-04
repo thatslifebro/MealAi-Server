@@ -12,7 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import VARCHAR
 import datetime
-from app.database.database import Base
+from app.database.database import Base, engine
 from app.dto.feed.FeedRequest import MealTimeEnum
 
 
@@ -34,7 +34,7 @@ class Feed(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
 
-    user = relationship("User", back_populates="Feed")
+    user = relationship("User")
 
 
 class FoodInfo(Base):
@@ -45,7 +45,7 @@ class FoodInfo(Base):
         String(255).with_variant(VARCHAR(255, charset="utf8"), "mysql"), nullable=False
     )
     weight = Column(Numeric(precision=7, scale=2), nullable=False)
-    kca = Column(Numeric(precision=7, scale=2), nullable=False)
+    kcal = Column(Numeric(precision=7, scale=2), nullable=False)
     carbohydrate = Column(Numeric(precision=7, scale=2), nullable=False)
     protein = Column(Numeric(precision=7, scale=2), nullable=False)
     fat = Column(Numeric(precision=7, scale=2), nullable=False)
@@ -62,5 +62,5 @@ class FeedFood(Base):
     weight = Column(Numeric(precision=7, scale=2))
     is_deleted = Column(Boolean, default=0)
 
-    food = relationship("FoodInfo", back_populates="FeedFood")
-    feed = relationship("Feed", cascade="delete", back_populates="FeedFood")
+    food = relationship("FoodInfo")
+    feed = relationship("Feed", cascade="delete")
