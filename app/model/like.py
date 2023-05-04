@@ -14,5 +14,5 @@ class Likes(Base):
     feed_id = Column(Integer, ForeignKey("Feed.feed_id"), primary_key=True)
     user_id = Column(Integer, ForeignKey("User.user_id"), primary_key=True)
 
-    user = relationship("User", back_populates="Likes")
-    feed = relationship("Feed", back_populates="Likes")
+    user = relationship("User")
+    feed = relationship("Feed")
