@@ -45,7 +45,7 @@ class FoodInfo(Base):
         String(255).with_variant(VARCHAR(255, charset="utf8"), "mysql"), nullable=False
     )
     weight = Column(Numeric(precision=7, scale=2), nullable=False)
-    kca = Column(Numeric(precision=7, scale=2), nullable=False)
+    kcal = Column(Numeric(precision=7, scale=2), nullable=False)
     carbohydrate = Column(Numeric(precision=7, scale=2), nullable=False)
     protein = Column(Numeric(precision=7, scale=2), nullable=False)
     fat = Column(Numeric(precision=7, scale=2), nullable=False)

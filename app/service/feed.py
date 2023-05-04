@@ -2,7 +2,7 @@ from app.dao.feed import *
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 
 
-class LikeService:
+class FeedService:
     def __init__(self):
         ...
 
