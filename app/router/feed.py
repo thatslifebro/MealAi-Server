@@ -16,7 +16,7 @@ router = APIRouter(
     tags=["feed"],
 )
 def post_feed(req: PostFeed) -> str:
-    return FeedService.service_post_feed(req)
+    return FeedService().service_post_feed(req)
 
 
 @router.get(
@@ -31,7 +31,7 @@ def get_feeds(
     page: int = 1,
     per_page: int = 7,
 ):
-    return FeedService.service_get_feeds(page, per_page)
+    return FeedService().service_get_feeds(page=page, per_page=per_page)
 
 
 @router.get(
@@ -41,7 +41,7 @@ def get_feeds(
     tags=["feed"],
 )
 def get_my_likes():
-    return LikeService.service_get_my_likes()
+    return LikeService().service_get_my_likes()
 
 
 @router.patch(
@@ -51,7 +51,7 @@ def get_my_likes():
     tags=["feed"],
 )
 def patch_likes_by_id(feed_id: int):
-    return LikeService.service_patch_likes_by_id(feed_id)
+    return LikeService().service_patch_likes_by_id(feed_id=feed_id)
 
 
 @router.get(
@@ -61,7 +61,7 @@ def patch_likes_by_id(feed_id: int):
     tags=["feed"],
 )
 def get_feed_by_id(feed_id: int):
-    return FeedService.service_get_feed_by_id(feed_id)
+    return FeedService().service_get_feed_by_id(feed_id=feed_id)
 
 
 @router.patch(
@@ -71,7 +71,7 @@ def get_feed_by_id(feed_id: int):
     tags=["feed"],
 )
 def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
-    return FeedService.service_patch_feed(feed_id, req)
+    return FeedService().service_patch_feed(feed_id=feed_id, req=req)
 
 
 @router.delete(
@@ -81,4 +81,4 @@ def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
     tags=["feed"],
 )
 def delete_feed_by_id(feed_id: int):
-    return FeedService.service_delete_feed(feed_id)
+    return FeedService().service_delete_feed(feed_id=feed_id)

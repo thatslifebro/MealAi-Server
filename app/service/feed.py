@@ -4,7 +4,7 @@ from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 
 class FeedService:
     def __init__(self):
-        ...
+        pass
 
     def service_get_feed_by_id(self, feed_id: int):
         likes = get_feed_likes(feed_id)
