@@ -20,6 +20,7 @@ async def create(user: CreateUserRequest):
         }
 
         conn.execute(statement, values)
+        conn.commit()
         return None
 
 
@@ -58,6 +59,7 @@ async def update_info(user: EditUserInfoRequest, user_id):
         }
 
         conn.execute(statement, values)
+        conn.commit()
         return None
 
 
@@ -70,6 +72,7 @@ async def update_password(password: bytes, user_id: int):
         values = {"user_id": user_id, "password": password}
 
         conn.execute(statement, values)
+        conn.commit()
         return None
 
 
@@ -80,4 +83,5 @@ async def delete(user_id: int):
         values = {"user_id": user_id}
 
         conn.execute(statement, values)
+        conn.commit()
         return None
