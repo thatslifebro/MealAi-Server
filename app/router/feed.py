@@ -1,10 +1,8 @@
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
-from typing import List
 from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
-from enum import Enum
-
+from app.service.feed import *
+from app.service.like import *
 
 router = APIRouter(
     prefix="/api/feeds",
@@ -14,11 +12,11 @@ router = APIRouter(
 @router.post(
     "",
     description="피드 작성",
-    response_model=None,
+    response_model=str,
     tags=["feed"],
 )
 def post_feed(req: PostFeed) -> str:
-    pass
+    return FeedService().service_post_feed(req)
 
 
 @router.get(
@@ -28,12 +26,32 @@ def post_feed(req: PostFeed) -> str:
     tags=["feed"],
 )
 def get_feeds(
-    goal: GoalEnum,
+    goal: GoalEnum = "balance",
     filter: FilterEnum = "newest",
     page: int = 1,
     per_page: int = 7,
 ):
-    pass
+    return FeedService().service_get_feeds(page=page, per_page=per_page)
+
+
+@router.get(
+    "/likes",
+    description="내가 좋아요한 피드",
+    response_model=List[FeedData],
+    tags=["feed"],
+)
+def get_my_likes():
+    return LikeService().service_get_my_likes()
+
+
+@router.patch(
+    "/likes/{feed_id}",
+    description="좋아요 토글",
+    response_model=str,
+    tags=["feed"],
+)
+def patch_likes_by_id(feed_id: int):
+    return LikeService().service_patch_likes_by_id(feed_id=feed_id)
 
 
 @router.get(
@@ -43,7 +61,7 @@ def get_feeds(
     tags=["feed"],
 )
 def get_feed_by_id(feed_id: int):
-    pass
+    return FeedService().service_get_feed_by_id(feed_id=feed_id)
 
 
 @router.patch(
@@ -53,34 +71,14 @@ def get_feed_by_id(feed_id: int):
     tags=["feed"],
 )
 def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
-    pass
+    return FeedService().service_patch_feed(feed_id=feed_id, req=req)
 
 
 @router.delete(
     "/{feed_id}",
     description="피드 삭제",
-    response_model=None,
+    response_model=str,
     tags=["feed"],
 )
 def delete_feed_by_id(feed_id: int):
-    pass
-
-
-@router.patch(
-    "/like.py/{feed_id}",
-    description="좋아요 토글",
-    response_model=None,
-    tags=["feed"],
-)
-def patch_likes_by_id(feed_id: int):
-    pass
-
-
-@router.get(
-    "/like.py",
-    description="내가 좋아요한 피드",
-    response_model=List[FeedData],
-    tags=["feed"],
-)
-def get_my_likes():
-    pass
+    return FeedService().service_delete_feed(feed_id=feed_id)

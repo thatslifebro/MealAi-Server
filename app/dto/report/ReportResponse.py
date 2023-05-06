@@ -2,10 +2,9 @@ import datetime
 
 from pydantic import BaseModel, Field
 from typing import List
-from app.dto.feed.FeedRequest import Food, MealTimeEnum, GoalEnum
 
 
-class FeedData(BaseModel):
+class ReportData(BaseModel):
     feed_id: int = Field(..., title="피드 ID")
     user_id: int = Field(..., title="작성자 ID")
     image_url: str = Field(..., title="전체 이미지 URL")

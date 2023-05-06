@@ -2,50 +2,58 @@ from sqlalchemy import (
     Boolean,
     Column,
     ForeignKey,
-    Date,
     Integer,
     String,
     DateTime,
     Float,
+    Enum,
+    CheckConstraint,
+    text,
+    BINARY,
 )
-from sqlalchemy.dialects.mysql import VARCHAR
-import datetime
+from sqlalchemy.orm import relationship
+from _datetime import datetime
 from app.database.database import Base
 
 
 class User(Base):
     __tablename__ = "User"
-
-    user_id = Column(Integer, primary_key=True)
-    email = Column(String(50).with_variant(VARCHAR(255, charset="utf8"), "mysql"))
-    password = Column(String(50).with_variant(VARCHAR(255, charset="utf8"), "mysql"))
-    gender = Column(String(10).with_variant(VARCHAR(255, charset="utf8"), "mysql"))
-    age_group = Column(Integer)
-    nickname = Column(String(50).with_variant(VARCHAR(255, charset="utf8"), "mysql"))
-    created_at = Column(DateTime, default=datetime.datetime.utcnow())
-    updated_at = Column(DateTime)
-    is_deleted = Column(Boolean, default=False)
-    goal = Column(String(50).with_variant(VARCHAR(255, charset="utf8"), "mysql"))
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(255), unique=True, nullable=False)
+    password = Column(BINARY(60), nullable=False)
+    gender = Column(Enum("M", "F"), nullable=False)
+    age_group = Column(
+        Integer,
+        CheckConstraint("age_group BETWEEN 1 AND 9"),
+        nullable=False,
+    )
+    nickname = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=text("CURRENT_TIMESTAMP"), nullable=False)
+    updated_at = Column(DateTime, default=None, onupdate=datetime.now, nullable=False)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    goal = Column(Enum("balance", "diet", "muscle", "lchf"), nullable=False)
 
 
 class UserDailyNutrient(Base):
     __tablename__ = "UserDailyNutrient"
 
     user_id = Column(ForeignKey("User.user_id"), primary_key=True)
-    kcal = Column(Float(precision=7, decimal_return_scale=2))
-    carbohydrate = Column(Float(precision=7, decimal_return_scale=2))
-    protein = Column(Float(precision=7, decimal_return_scale=2))
-    fat = Column(Float(precision=7, decimal_return_scale=2))
+    kcal = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+    carbohydrate = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+    protein = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+    fat = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+
+    user = relationship("User")
 
 
 class DailyNutrient(Base):
     __tablename__ = "DailyNutrient"
 
-    gender = Column(
-        String(10).with_variant(VARCHAR(255, charset="utf8"), "mysql"), primary_key=True
+    gender = Column(Enum("M", "F"), primary_key=True)
+    age_group = Column(
+        Integer, CheckConstraint("age_group BETWEEN 1 AND 9"), primary_key=True
     )
-    age_group = Column(Integer, primary_key=True)
-    kcal = Column(Float(precision=7, decimal_return_scale=2))
-    carbohydrate = Column(Float(precision=7, decimal_return_scale=2))
-    protein = Column(Float(precision=7, decimal_return_scale=2))
-    fat = Column(Float(precision=7, decimal_return_scale=2))
+    kcal = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+    carbohydrate = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+    protein = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
+    fat = Column(Float(precision=7, decimal_return_scale=2), nullable=False)
