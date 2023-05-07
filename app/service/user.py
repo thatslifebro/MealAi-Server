@@ -3,6 +3,14 @@ from app.dto.user.UserRequest import *
 from app.dto.user.UserResponse import *
 from app.utils.hash_password import hash_password
 import bcrypt
+from app.error.user import *
+
+goal_num = {
+    "balance": [1, 1, 1, 1],
+    "diet": [0.8, 0.8, 1, 0.8],
+    "muscle": [1.3, 1.3, 1.3, 1.3],
+    "lchf": [0.8, 0.8, 1, 1.3],
+}
 
 
 class UserService:
@@ -12,22 +20,43 @@ class UserService:
     async def register(self, user: CreateUserRequest):
         is_find = await read_by_email(user.email)
         if is_find:
-            raise ValueError("중복된 email 입니다.")
+            raise DuplicatedEmailException
+        if is_find and is_find.get("is_deleted"):
+            raise DeletedEmailException
         user.password = hash_password(user.password)
         res = await create(user)
+
+        created_user = await read_by_email(user.email)
+        daily_nutrient = await read_by_gender_age(
+            gender=created_user.gender, age_group=created_user.age_group
+        )
+        user_daily_nutrient = [
+            i * j for (i, j) in zip(daily_nutrient, goal_num[created_user.goal])
+        ]
+        await create_user_daily_nutrient(created_user.user_id, user_daily_nutrient)
         return None
 
     async def get_user_info(self, user_id: int):
         user = await read_by_user_id(user_id=user_id)
         if not user:
-            raise ValueError("DB에 없는 user 입니다.")
+            raise NotFoundUserException
         return user
 
     async def edit_user_info(self, user_id, update: EditUserInfoRequest):
         is_find = await read_by_user_id(user_id)
         if not is_find:
-            raise ValueError("DB에 없는 user 입니다.")
+            raise NotFoundUserException
         res = await update_info(user=update, user_id=user_id)
+
+        user = await read_by_user_id(user_id)
+        daily_nutrient = await read_by_gender_age(
+            gender=user.gender, age_group=user.age_group
+        )
+        user_daily_nutrient = [
+            i * j for (i, j) in zip(daily_nutrient, goal_num[user.goal])
+        ]
+        await update_user_daily_nutrient(user.user_id, user_daily_nutrient)
+
         return None
 
     async def change_password(self, user_id: int, update: ChangePasswordRequest):
@@ -39,7 +68,7 @@ class UserService:
     async def delete_user(self, user_id: int):
         user = await read_by_user_id(user_id=user_id)
         if not user:
-            raise ValueError("DB에 없는 user 입니다.")
+            raise NotFoundUserException
 
         res = await delete(user_id=user_id)
         return None
@@ -47,7 +76,7 @@ class UserService:
     async def check_password(self, user_id: int, password: str):
         user = await read_by_user_id(user_id=user_id)
         if not user:
-            raise ValueError("DB에 없는 user 입니다.")
+            raise NotFoundUserException
         if not bcrypt.checkpw(password.encode("utf-8"), user.password):
-            raise ValueError("현재 비밀번호가 일치하지 않습니다.")
+            raise NotMatchPasswordException
         return None
