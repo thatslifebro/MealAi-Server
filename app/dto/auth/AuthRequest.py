@@ -8,3 +8,7 @@ class LoginRequest(BaseModel):
 
 class EmailRequest(BaseModel):
     email: EmailStr = Field(..., title="사용자 Email")
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str = Field(..., title="refresh Token")

@@ -44,6 +44,54 @@ async def read_by_user_id(user_id: int):
         return user
 
 
+async def read_by_gender_age(gender: str, age_group: int):
+    with engine.connect() as conn:
+        statement = text(
+            """ SELECT * FROM DailyNutrient WHERE gender = :gender AND age_group = :age_group"""
+        )
+        res = conn.execute(statement, {"gender": gender, "age_group": age_group})
+        nutrient = res.fetchone()
+        return list(nutrient[2:])
+
+
+async def create_user_daily_nutrient(user_id: int, nutrient: list):
+    with engine.connect() as conn:
+        statement = text(
+            """INSERT INTO UserDailyNutrient (user_id, kcal, carbohydrate, protein, fat) VALUES (:user_id, :kcal, :carbohydrate, :protein, :fat)"""
+        )
+
+        values = {
+            "user_id": user_id,
+            "kcal": nutrient[0],
+            "carbohydrate": nutrient[1],
+            "protein": nutrient[2],
+            "fat": nutrient[3],
+        }
+
+        conn.execute(statement, values)
+        conn.commit()
+        return None
+
+
+async def update_user_daily_nutrient(user_id: int, nutrient: list):
+    with engine.connect() as conn:
+        statement = text(
+            """UPDATE UserDailyNutrient SET user_id=:user_id, kcal=:kcal, carbohydrate=:carbohydrate, protein=:protein, fat=:fat WHERE user_id=:user_id"""
+        )
+
+        values = {
+            "user_id": user_id,
+            "kcal": nutrient[0],
+            "carbohydrate": nutrient[1],
+            "protein": nutrient[2],
+            "fat": nutrient[3],
+        }
+
+        conn.execute(statement, values)
+        conn.commit()
+        return None
+
+
 async def update_info(user: EditUserInfoRequest, user_id):
     with engine.connect() as conn:
         statement = text(

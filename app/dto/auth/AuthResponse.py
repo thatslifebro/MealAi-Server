@@ -8,3 +8,8 @@ class LoginResponse(BaseModel):
 
 class EmailResponse(BaseModel):
     authentication_number: int = Field(..., description="인증번호")
+
+
+class RefreshResponse(BaseModel):
+    access_token: str = Field(..., description="Access Token")
+    refresh_token: str = Field(..., description="Refresh Token")

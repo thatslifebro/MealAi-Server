@@ -1,17 +1,23 @@
-from app.dao.user import *
+from app.error.user import *
 import bcrypt, jwt
 from app.dao.user import *
 from app.dto.auth.AuthRequest import *
 from app.dto.auth.AuthResponse import *
 from starlette.config import Config
+from datetime import datetime, timedelta
+import time
 import smtplib, ssl
 import random
 from email.message import EmailMessage
 from app.utils.hash_password import hash_password
+from app.dao.auth import *
+from jwt.exceptions import *
+from app.error.auth import *
 
 config = Config(".env")
 
 ACCESS_TOKEN_SECRET = config("ACCESS_TOKEN_SECRET")
+REFRESH_TOKEN_SECRET = config("REFRESH_TOKEN_SECRET")
 ALGORITHM = config("ALGORITHM")
 SMTP_SERVER = config("SMTP_SERVER")
 SMTP_SSL_PORT = config("SMTP_SSL_PORT")
@@ -28,31 +34,48 @@ class AuthService:
         user = await read_by_email(email=email)
 
         if not user:
-            raise ValueError("email이 존재하지 않습니다.")
-
+            raise NotFoundUserException
+        if user.is_deleted:
+            raise DeletedEmailException
         if not bcrypt.checkpw(password.encode("utf-8"), user.password):
-            raise ValueError("현재 비밀번호가 일치하지 않습니다.")
+            raise NotMatchPasswordException
 
+        access_token = self.create_access_token(user.user_id)
+        refresh_token = self.create_refresh_token(user.user_id)
+
+        await upsert_refresh_token(user.user_id, refresh_token)
         return LoginResponse(
-            access_token=self.create_access_token(user.user_id),
-            refresh_token=self.create_refresh_token(),
+            access_token=access_token,
+            refresh_token=refresh_token,
         )
 
     def create_access_token(self, user_id: int):
-        payload = {"user_id": user_id}
-        access_token = jwt.encode(payload, ACCESS_TOKEN_SECRET, ALGORITHM)
+        minutes = 1
+        payload = {
+            "user_id": user_id,
+            "exp": datetime.utcnow() + timedelta(minutes=minutes),
+        }
+        access_token = jwt.encode(
+            payload,
+            ACCESS_TOKEN_SECRET,
+            ALGORITHM,
+        )
         return access_token
 
-    def create_refresh_token(self):
-        payload = {}
-        refresh_token = jwt.encode(payload, ACCESS_TOKEN_SECRET, ALGORITHM)
+    def create_refresh_token(self, user_id: int):
+        minutes = 60 * 24 * 30
+        payload = {
+            "user_id": user_id,
+            "exp": datetime.utcnow() + timedelta(minutes=minutes),
+        }
+        refresh_token = jwt.encode(payload, REFRESH_TOKEN_SECRET, ALGORITHM)
         return refresh_token
 
     async def send_mail_for_register(self, receiver_email: str):
         user = await read_by_email(receiver_email)
 
         if user:
-            raise ValueError("이미 가입된 Email 입니다.")
+            raise DuplicatedEmailException
 
         msg = EmailMessage()
         msg["Subject"] = "MealAi 회원가입 이메일 인증"
@@ -75,7 +98,9 @@ class AuthService:
         user = await read_by_email(receiver_email)
 
         if not user:
-            raise ValueError("Email이 존재하지 않습니다.")
+            raise NotFoundUserException
+        if user.is_deleted:
+            raise DeletedEmailException
 
         auth_num = str(random.randint(100000, 999999))
         changed_password = hash_password(auth_num)
@@ -97,3 +122,28 @@ class AuthService:
             server.send_message(msg)
 
         return None
+
+    async def refresh(self, refresh_token: RefreshRequest):
+        refresh_token = refresh_token.refresh_token
+        try:
+            payload = jwt.decode(
+                jwt=refresh_token, key=REFRESH_TOKEN_SECRET, algorithms=ALGORITHM
+            )
+            user_id = payload.get("user_id")
+            db_refresh_token = await read_refresh_token_by_user_id(user_id=user_id)
+            if refresh_token != db_refresh_token.refresh_token:
+                raise NotFoundUserException
+
+            access_token = self.create_access_token(user_id=user_id)
+            refresh_token = self.create_refresh_token(user_id=user_id)
+
+            await upsert_refresh_token(user_id, refresh_token=refresh_token)
+
+            return RefreshResponse(
+                access_token=access_token,
+                refresh_token=refresh_token,
+            )
+        except ExpiredSignatureError:
+            raise ExpiredAccessTokenException
+        except InvalidSignatureError:
+            raise InvalidTokenException
