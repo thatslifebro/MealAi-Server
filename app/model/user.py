@@ -4,7 +4,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    DateTime,
+    DATETIME,
     Float,
     Enum,
     CheckConstraint,
@@ -28,8 +28,8 @@ class User(Base):
         nullable=False,
     )
     nickname = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=text("CURRENT_TIMESTAMP"), nullable=False)
-    updated_at = Column(DateTime, default=None, onupdate=datetime.now, nullable=False)
+    created_at = Column(DATETIME, default=text("CURRENT_TIMESTAMP"), nullable=False)
+    updated_at = Column(DATETIME, default=None, onupdate=datetime.now, nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
     goal = Column(Enum("balance", "diet", "muscle", "lchf"), nullable=False)
 
