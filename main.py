@@ -22,11 +22,6 @@ origins = [
     "https://meal-ai-client.vercel.app",
 ]
 
-app.include_router(auth.router)
-app.include_router(user.router)
-app.include_router(feed.router)
-app.include_router(report.router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -35,6 +30,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(user.router)
+app.include_router(feed.router)
+app.include_router(report.router)
 
 @app.exception_handler(CustomException)
 async def custom_exception_handler(request, exc):
