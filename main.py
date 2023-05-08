@@ -35,6 +35,7 @@ app.include_router(user.router)
 app.include_router(feed.router)
 app.include_router(report.router)
 
+
 @app.exception_handler(CustomException)
 async def custom_exception_handler(request, exc):
     return JSONResponse(
