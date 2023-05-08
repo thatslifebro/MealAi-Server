@@ -39,8 +39,9 @@ async def register(request: CreateUserRequest):
     "", description="회원정보 조회", response_model=GetUserInfoResponse, tags=["user"]
 )
 async def get_user_info(user_id: int = Depends(current_user_id)):
-    user = await UserService().get_user_info(user_id=user_id)
-    return GetUserInfoResponse(**user)
+    res = await UserService().get_user_info(user_id=user_id)
+    res = res._asdict()
+    return GetUserInfoResponse(**res)
 
 
 @router.patch(
