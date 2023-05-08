@@ -1,6 +1,9 @@
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.dao.like import get_feed_likes
 from app.database.database import engine
 from sqlalchemy.sql import text
+from app.error.feed import NotFeedOwnerException
 
 
 def get_feed_by_id(feed_id: int):
@@ -30,6 +33,17 @@ def get_food_info_by_id(food_id: int):
         return food_info
 
 
+def error_test():
+    with engine.connect() as conn:
+        try:
+            statement = text("""DELETE FROM Feedasdf WHERE a=2""")
+            conn.execute(statement)
+
+        except SQLAlchemyError as e:
+            error = str(e.__dict__["orig"])
+            return error
+
+
 def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
         data = {"skip": skip, "limit": limit}
@@ -41,22 +55,19 @@ def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
         return feeds
 
 
-def post_feed(post_feed_data, foods_data):
-    with engine.connect() as conn:
-        statement = text(
-            """INSERT INTO Feed VALUES(:feed_id,:user_id,:image_url,:thumbnail_url,:meal_time,:date,:open,:created_at,:updated_at,:is_deleted)"""
-        )
+def post_feed(session, post_feed_data, foods_data):
+    statement = text(
+        """INSERT INTO Feed VALUES(:feed_id,:user_id,:image_url,:thumbnail_url,:meal_time,:date,:open,:created_at,:updated_at,:is_deleted)"""
+    )
 
-        conn.execute(statement, post_feed_data)
-        conn.commit()
+    session.execute(statement, post_feed_data)
 
 
-def get_recent_post_id():
-    with engine.connect() as conn:
-        statement = text("""SELECT LAST_INSERT_ID()""")
-        result = conn.execute(statement)
-        feed_id = result.mappings().first()["LAST_INSERT_ID()"]
-        return feed_id
+def get_recent_post_id(session):
+    statement = text("""SELECT LAST_INSERT_ID()""")
+    result = session.execute(statement)
+    feed_id = result.mappings().first()["LAST_INSERT_ID()"]
+    return feed_id
 
 
 def insert_feed_food(feed_id, food_data):
@@ -76,27 +87,34 @@ def insert_feed_food(feed_id, food_data):
         conn.commit()
 
 
-def delete_feed_food(feed_id: int):
-    with engine.connect() as conn:
-        data = ({"feed_id": feed_id},)
+def delete_feed_food(session, feed_id: int):
+    data = ({"feed_id": feed_id},)
 
-        statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
-        conn.execute(statement, data)
-        conn.commit()
+    statement = text("""DELETE FROM FeedFood WHERE feed_id = :feed_id""")
+    session.execute(statement, data)
 
 
-def delete_feed(feed_id: int):
-    with engine.connect() as conn:
-        data = ({"feed_id": feed_id},)
-        statement = text("""DELETE FROM Feed WHERE feed_id = :feed_id""")
-        conn.execute(statement, data)
-        conn.commit()
+def delete_feed(session, feed_id: int):
+    data = ({"feed_id": feed_id},)
+    statement = text("""DELETE FROM Feed WHERE feed_id = :feed_id""")
+    session.execute(statement, data)
 
 
-def patch_feed(feed_id: int, patch_feed_data):
+def patch_feed(patch_feed_data):
     with engine.connect() as conn:
         statement = text(
-            """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=feed_id"""
+            """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=:feed_id"""
         )
         conn.execute(statement, patch_feed_data)
         conn.commit()
+
+
+def match_feed_user(feed_id: int, user_id: int):
+    with engine.connect() as conn:
+        data = {"feed_id": feed_id}
+        statement = text("""SELECT user_id FROM Feed WHERE feed_id=:feed_id""")
+        result = conn.execute(statement, data)
+        if user_id == result.mappings().first():
+            return True
+        else:
+            return False

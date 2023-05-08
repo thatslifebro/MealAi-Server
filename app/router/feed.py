@@ -3,6 +3,7 @@ from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
 from app.service.feed import *
 from app.service.like import *
+from app.utils.depends import *
 
 router = APIRouter(
     prefix="/api/feeds",
@@ -15,8 +16,8 @@ router = APIRouter(
     response_model=str,
     tags=["feed"],
 )
-def post_feed(req: PostFeed) -> str:
-    return FeedService().service_post_feed(req)
+def post_feed(req: PostFeed, user_id: int = Depends(current_user_id)) -> str:
+    return FeedService().service_post_feed(req, user_id)
 
 
 @router.get(
@@ -31,7 +32,12 @@ def get_feeds(
     page: int = 1,
     per_page: int = 7,
 ):
-    return FeedService().service_get_feeds(page=page, per_page=per_page)
+    return FeedService().service_get_feeds(page, per_page)
+
+
+@router.get("/error")
+def get_feeds():
+    return FeedService().error()
 
 
 @router.get(
@@ -40,8 +46,8 @@ def get_feeds(
     response_model=List[FeedData],
     tags=["feed"],
 )
-def get_my_likes():
-    return LikeService().service_get_my_likes()
+def get_my_likes(user_id: int = Depends(current_user_id)):
+    return LikeService().service_get_my_likes_feeds(user_id)
 
 
 @router.patch(
@@ -50,8 +56,8 @@ def get_my_likes():
     response_model=str,
     tags=["feed"],
 )
-def patch_likes_by_id(feed_id: int):
-    return LikeService().service_patch_likes_by_id(feed_id=feed_id)
+def patch_likes_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
+    return LikeService().service_patch_likes_by_id(feed_id, user_id)
 
 
 @router.get(
@@ -70,8 +76,10 @@ def get_feed_by_id(feed_id: int):
     response_model=FeedData,
     tags=["feed"],
 )
-def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
-    return FeedService().service_patch_feed(feed_id=feed_id, req=req)
+def patch_feed_by_id(
+    feed_id: int, req: PatchFeedData, user_id: int = Depends(current_user_id)
+) -> FeedData:
+    return FeedService().service_patch_feed(feed_id, req, user_id)
 
 
 @router.delete(
@@ -80,5 +88,5 @@ def patch_feed_by_id(feed_id: int, req: PatchFeedData) -> FeedData:
     response_model=str,
     tags=["feed"],
 )
-def delete_feed_by_id(feed_id: int):
-    return FeedService().service_delete_feed(feed_id=feed_id)
+def delete_feed_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
+    return FeedService().service_delete_feed(feed_id, user_id)
