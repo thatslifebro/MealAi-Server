@@ -8,7 +8,7 @@ config = Config(".env")
 
 SQLALCHEMY_DATABASE_URL = config("SQLALCHEMY_DATABASE_URL")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, future=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
