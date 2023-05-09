@@ -14,6 +14,7 @@ from app.dao.auth import *
 from jwt.exceptions import *
 from app.error.auth import *
 
+
 config = Config(".env")
 
 ACCESS_TOKEN_SECRET = config("ACCESS_TOKEN_SECRET")
@@ -49,13 +50,13 @@ class AuthService:
             refresh_token=refresh_token,
         )
 
-    async def logout(self, refresh_token: str):
-        await delete_refresh_token(refresh_token)
-
+    async def logout(self, user: LogoutRequest, redis):
+        await delete_refresh_token(user_id=user.user_id)
+        redis.sadd("blacklist", user.access_token)
         return None
 
     def create_access_token(self, user_id: int):
-        minutes = 2
+        minutes = 30
         payload = {
             "user_id": user_id,
             "exp": datetime.utcnow() + timedelta(minutes=minutes),

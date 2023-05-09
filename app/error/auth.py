@@ -34,3 +34,10 @@ class NotMatchRefreshTokenException(CustomException):
     error_code = 2005
     error_name = "NOT_MACTH_REFRESH_TOKEN"
     message = "DB의 Refersh Token과 일치하지 않습니다."
+
+
+class TokenIsBlacklist(CustomException):
+    status = 401
+    error_code = 2006
+    error_name = "TOKEN_IS_BLACKLIST"
+    message = "Blacklist에 있는 Access Token 입니다."

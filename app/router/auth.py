@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from app.dto.auth.AuthRequest import *
 from app.dto.auth.AuthResponse import *
 from app.service.auth import AuthService
+from app.utils.depends import *
+from app.database.token import get_redis, Redis
 
 router = APIRouter(
     prefix="/api/auth",
@@ -14,8 +16,11 @@ async def login(request: LoginRequest):
 
 
 @router.post("/logout", description="로그아웃", response_model=str, tags=["auth"])
-async def logout(request: LogoutRequest):
-    await AuthService().logout(refresh_token=request.refresh_token)
+async def logout(
+    request: LogoutRequest = Depends(current_user_token),
+    redis: Redis = Depends(get_redis),
+):
+    await AuthService().logout(user=request, redis=redis)
     return "로그아웃 완료"
 
 
