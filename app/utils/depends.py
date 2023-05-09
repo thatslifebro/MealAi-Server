@@ -19,9 +19,10 @@ async def current_user_id(
     if not authorization_:
         raise NotFoundAuthorizedHeaderException
 
+    if not authorization_.startswith("Bearer "):
+        raise NoTypeBearerException
+
     token_type, token = authorization_.split()
-    if token_type != "Bearer":
-        raise InvalidTokenException
 
     is_blacklist_token(token, redis)
 
@@ -38,9 +39,10 @@ async def current_user_token(
     if not authorization_:
         raise NotFoundAuthorizedHeaderException
 
+    if not authorization_.startswith("Bearer "):
+        raise NoTypeBearerException
+
     token_type, token = authorization_.split()
-    if token_type != "Bearer":
-        raise InvalidTokenException
 
     is_blacklist_token(token, redis)
 
@@ -82,7 +84,6 @@ def is_blacklist_token(access_token: str, redis: Redis):
 def jwt_verify(token: str):
     try:
         payload = jwt.decode(jwt=token, key=ACCESS_TOKEN_SECRET, algorithms=ALGORITHM)
-
         return payload
     except ExpiredSignatureError:
         raise ExpiredAccessTokenException
