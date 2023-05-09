@@ -8,6 +8,7 @@ from app.router import user, feed, auth, report
 from app.error.base import CustomException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from app.database.token import Redis, get_redis
 
 model_feed.Base.metadata.create_all(bind=engine)
 model_user.Base.metadata.create_all(bind=engine)
@@ -16,11 +17,14 @@ model_auth.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+
 origins = [
     "http://localhost:3000",
     "https://meal-ai-client-git-dev-client-meal-ai.vercel.app",
     "https://meal-ai-client.vercel.app",
 ]
+
+redis = Redis()
 
 app.add_middleware(
     CORSMiddleware,

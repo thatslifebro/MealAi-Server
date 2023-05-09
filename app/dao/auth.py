@@ -31,14 +31,12 @@ async def read_refresh_token_by_user_id(user_id: int):
         return user
 
 
-async def delete_refresh_token(refresh_token: str):
+async def delete_refresh_token(user_id: int):
     with engine.connect() as conn:
-        statement = text(
-            """DELETE FROM RefreshToken WHERE refresh_token=:refresh_token"""
-        )
+        statement = text("""DELETE FROM RefreshToken WHERE user_id=:user_id""")
 
         values = {
-            "refresh_token": refresh_token,
+            "user_id": user_id,
         }
 
         conn.execute(statement, values)
