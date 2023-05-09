@@ -49,6 +49,11 @@ class AuthService:
             refresh_token=refresh_token,
         )
 
+    async def logout(self, refresh_token: str):
+        await delete_refresh_token(refresh_token)
+
+        return None
+
     def create_access_token(self, user_id: int):
         minutes = 2
         payload = {
