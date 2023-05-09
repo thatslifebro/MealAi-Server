@@ -39,5 +39,10 @@ app.include_router(report.router)
 @app.exception_handler(CustomException)
 async def custom_exception_handler(request, exc):
     return JSONResponse(
-        status_code=exc.code, content={"error": exc.error_name, "message": exc.message}
+        status_code=exc.status,
+        content={
+            "error_code": exc.error_code,
+            "error_name": exc.error_name,
+            "message": exc.message,
+        },
     )
