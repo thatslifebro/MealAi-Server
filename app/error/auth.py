@@ -26,7 +26,7 @@ class InvalidTokenException(CustomException):
     status = 401
     error_code = 2004
     error_name = "INVALID_TOKEN_TYPE"
-    message = "Token type이 Bearer가 아니거나 올바른 Token이 아닙니다."
+    message = "유효한 Token이 아닙니다."
 
 
 class NotMatchRefreshTokenException(CustomException):
@@ -41,3 +41,10 @@ class TokenIsBlacklist(CustomException):
     error_code = 2006
     error_name = "TOKEN_IS_BLACKLIST"
     message = "Blacklist에 있는 Access Token 입니다."
+
+
+class NoTypeBearerException(CustomException):
+    status = 401
+    error_code = 2007
+    error_name = "NO_TYPE_BEARER"
+    message = "Token type이 Bearer가 아닙니다."
