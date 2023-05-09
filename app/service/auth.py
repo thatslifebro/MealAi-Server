@@ -50,7 +50,7 @@ class AuthService:
         )
 
     def create_access_token(self, user_id: int):
-        minutes = 60
+        minutes = 2
         payload = {
             "user_id": user_id,
             "exp": datetime.utcnow() + timedelta(minutes=minutes),

@@ -16,8 +16,8 @@ router = APIRouter(
     response_model=str,
     tags=["feed"],
 )
-def post_feed(req: PostFeed, user_id: int = Depends(current_user_id)) -> str:
-    return FeedService().service_post_feed(req, user_id)
+async def post_feed(req: PostFeed, user_id: int = Depends(current_user_id)) -> str:
+    return await FeedService().service_post_feed(req, user_id)
 
 
 @router.get(
@@ -26,13 +26,14 @@ def post_feed(req: PostFeed, user_id: int = Depends(current_user_id)) -> str:
     response_model=List[FeedData],
     tags=["feed"],
 )
-def get_feeds(
+async def get_feeds(
     goal: GoalEnum = "balance",
     filter: FilterEnum = "newest",
     page: int = 1,
     per_page: int = 7,
+    user_id: int = Depends(current_user_id_for_feed),
 ):
-    return FeedService().service_get_feeds(page, per_page)
+    return await FeedService().service_get_feeds(page, per_page, user_id)
 
 
 @router.get("/error")
@@ -66,8 +67,10 @@ def patch_likes_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
     response_model=FeedData,
     tags=["feed"],
 )
-def get_feed_by_id(feed_id: int):
-    return FeedService().service_get_feed_by_id(feed_id=feed_id)
+async def get_feed_by_id(
+    feed_id: int, user_id: int = Depends(current_user_id_for_feed)
+):
+    return await FeedService().service_get_feed_by_id(feed_id, user_id)
 
 
 @router.patch(
@@ -76,10 +79,10 @@ def get_feed_by_id(feed_id: int):
     response_model=FeedData,
     tags=["feed"],
 )
-def patch_feed_by_id(
+async def patch_feed_by_id(
     feed_id: int, req: PatchFeedData, user_id: int = Depends(current_user_id)
 ) -> FeedData:
-    return FeedService().service_patch_feed(feed_id, req, user_id)
+    return await FeedService().service_patch_feed(feed_id, req, user_id)
 
 
 @router.delete(
