@@ -8,10 +8,10 @@ class LikeService:
         ...
 
     def service_patch_likes_by_id(self, feed_id: int, user_id):
-        try:
-            result = get_feed_likes_user(feed_id, user_id)
-        except SQLAlchemyError:
+        if get_feed_by_id(feed_id) is None:
             raise NoFeedIdException
+
+        result = get_feed_likes_user(feed_id, user_id)
 
         if result == 1:
             push_likes(feed_id, user_id)
