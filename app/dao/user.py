@@ -54,6 +54,21 @@ async def read_by_gender_age(gender: str, age_group: int):
         return list(nutrient[2:])
 
 
+async def get_user_daily_nutrient(user_id: int):
+    with engine.connect() as conn:
+        statement = text(
+            """SELECT kcal, carbohydrate, protein, fat FROM UserDailyNutrient WHERE user_id=:user_id"""
+        )
+
+        values = {
+            "user_id": user_id,
+        }
+
+        result = conn.execute(statement, values).mappings().first()
+
+        return result
+
+
 async def create_user_daily_nutrient(user_id: int, nutrient: list):
     with engine.connect() as conn:
         statement = text(
