@@ -13,9 +13,10 @@ async def login(request: LoginRequest):
     return await AuthService().login(login_info=request)
 
 
-@router.delete("/logout", description="로그아웃", response_model=None, tags=["auth"])
-async def logout():
-    pass
+@router.post("/logout", description="로그아웃", response_model=str, tags=["auth"])
+async def logout(request: LogoutRequest):
+    await AuthService().logout(refresh_token=request.refresh_token)
+    return "로그아웃 완료"
 
 
 @router.post(

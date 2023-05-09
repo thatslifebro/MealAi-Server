@@ -12,3 +12,7 @@ class EmailRequest(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str = Field(..., title="refresh Token")
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str = Field(..., title="refresh Token")

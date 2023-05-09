@@ -29,3 +29,19 @@ async def read_refresh_token_by_user_id(user_id: int):
         res = conn.execute(statement, values)
         user = res.fetchone()
         return user
+
+
+async def delete_refresh_token(refresh_token: str):
+    with engine.connect() as conn:
+        statement = text(
+            """DELETE FROM RefreshToken WHERE refresh_token=:refresh_token"""
+        )
+
+        values = {
+            "refresh_token": refresh_token,
+        }
+
+        conn.execute(statement, values)
+        conn.commit()
+
+        return None
