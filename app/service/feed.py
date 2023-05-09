@@ -1,11 +1,13 @@
 import datetime
 
 from app.dao.feed import *
+from app.dao.like import get_feed_likes_user
 from app.dao.user import read_by_user_id
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 from fastapi import HTTPException
 from app.error.feed import *
 from app.database.database import SessionLocal
+from app.utils.depends import current_user_id
 
 
 class FeedService:
@@ -28,10 +30,10 @@ class FeedService:
             ratio = feed_food.weight / food_info.weight
 
             nutrient = {
-                "kcal": food_info.kcal * ratio,
-                "carbohydrate": food_info.carbohydrate * ratio,
-                "protein": food_info.protein * ratio,
-                "fat": food_info.fat * ratio,
+                "kcal": round(food_info.kcal * ratio, 2),
+                "carbohydrate": round(food_info.carbohydrate * ratio, 2),
+                "protein": round(food_info.protein * ratio, 2),
+                "fat": round(food_info.fat * ratio, 2),
             }
 
             kcal += nutrient["kcal"]
@@ -51,21 +53,32 @@ class FeedService:
         }
         return data_foods, total_nutrient
 
-    def service_get_feed_by_id(self, feed_id: int):
+    async def service_get_feed_by_id(self, feed_id: int, user_id: int):
         feed_data = get_feed_by_id(feed_id)
         if feed_data is None:
             raise NoFeedIdException
+
+        if not feed_data.open and feed_data.user_id != user_id:
+            raise UnauthorizedFeedException
+
         likes = get_feed_likes(feed_id)
 
         feed_food_data = get_feed_food_by_id(feed_id)
 
+        userInfo = await read_by_user_id(feed_data.user_id)
+
         data_foods, total_nutrient = self.service_get_food_info_by_data(feed_food_data)
 
         # my_like 는 인증기능 구현필요, user_name 도 goal 도
+        if user_id == -1:
+            my_like = False
+        else:
+            my_like = get_feed_likes_user(feed_id, user_id)
+
         res = {
             "foods": data_foods,
-            "user_name": "user_name",
-            "my_like": True,
+            "user_name": userInfo.nickname,
+            "my_like": my_like,
             "goal": "balance",
             "likes": likes,
         }
@@ -75,23 +88,33 @@ class FeedService:
 
         return res
 
-    def service_get_feeds(self, page: int, per_page: int):
+    async def service_get_feeds(self, page: int, per_page: int, user_id: int):
         feeds = get_feeds_by_skip_limit(skip=(page - 1) * per_page, limit=per_page)
 
         array = []
 
         for feed in feeds:
+            if not feed.open and feed.user_id != user_id:
+                continue
+
             likes = get_feed_likes(feed.feed_id)
             feed_food_data = get_feed_food_by_id(feed.feed_id)
+
+            userInfo = await read_by_user_id(feed.user_id)
 
             data_foods, total_nutrient = self.service_get_food_info_by_data(
                 feed_food_data
             )
 
+            if user_id == -1:
+                my_like = False
+            else:
+                my_like = get_feed_likes_user(feed.feed_id, user_id)
+
             res = {
                 "foods": data_foods,
-                "user_name": "user_name",
-                "my_like": True,
+                "user_name": userInfo.nickname,
+                "my_like": my_like,
                 "goal": "balance",
                 "likes": likes,
             }
@@ -103,8 +126,8 @@ class FeedService:
 
         return array
 
-    def service_post_feed(self, req: PostFeed, user_id: int):
-        user = read_by_user_id(user_id)
+    async def service_post_feed(self, req: PostFeed, user_id: int):
+        user = await read_by_user_id(user_id)
         post_feed_data = {
             "image_url": req.image_url,
             "meal_time": req.meal_time,
@@ -120,14 +143,18 @@ class FeedService:
         }
 
         foods_data = req.foods
+        try:
+            session = SessionLocal()
+            post_feed(session, post_feed_data)
+            feed_id = get_recent_post_id(session)
 
-        session = SessionLocal()
-        post_feed(session, post_feed_data, foods_data)
-        feed_id = get_recent_post_id(session)
-        session.commit()
+            for food_data in foods_data:
+                insert_feed_food(session, feed_id, food_data)
 
-        for food_data in foods_data:
-            insert_feed_food(feed_id, food_data)
+            session.commit()
+        except SQLAlchemyError:
+            session.rollback()
+            raise UpdateFeedException
 
         return "ok"
 
@@ -136,7 +163,7 @@ class FeedService:
         if feed_data is None:
             raise NoFeedIdException
         elif not match_feed_user(feed_id, user_id):
-            raise NotFeedOwnerException
+            raise UnauthorizedFeedException
 
         session = SessionLocal()
         try:
@@ -149,9 +176,9 @@ class FeedService:
 
         return "ok"
 
-    def service_patch_feed(self, feed_id: int, req: PatchFeedData, user_id: int):
+    async def service_patch_feed(self, feed_id: int, req: PatchFeedData, user_id: int):
         if not match_feed_user(feed_id, user_id):
-            raise NotFeedOwnerException
+            raise UnauthorizedFeedException
 
         patch_feed_data = {
             "feed_id": feed_id,
@@ -164,15 +191,16 @@ class FeedService:
 
         session = SessionLocal()
         try:
-            patch_feed(feed_id, patch_feed_data)
-            delete_feed_food(feed_id)
-            insert_feed_food(foods_data)
+            patch_feed(session, patch_feed_data)
+            delete_feed_food(session, feed_id)
+            for food_data in foods_data:
+                insert_feed_food(session, feed_id, food_data)
             session.commit()
         except SQLAlchemyError:
             session.rollback()
             raise UpdateFeedException
 
-        return self.service_get_feed_by_id(feed_id)
+        return await self.service_get_feed_by_id(feed_id)
 
     def error(self):
         return error_test()

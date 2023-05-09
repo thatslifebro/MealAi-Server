@@ -3,7 +3,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.dao.like import get_feed_likes
 from app.database.database import engine
 from sqlalchemy.sql import text
-from app.error.feed import NotFeedOwnerException
 
 
 def get_feed_by_id(feed_id: int):
@@ -55,7 +54,7 @@ def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
         return feeds
 
 
-def post_feed(session, post_feed_data, foods_data):
+def post_feed(session, post_feed_data):
     statement = text(
         """INSERT INTO Feed VALUES(:feed_id,:user_id,:image_url,:thumbnail_url,:meal_time,:date,:open,:created_at,:updated_at,:is_deleted)"""
     )
@@ -70,21 +69,19 @@ def get_recent_post_id(session):
     return feed_id
 
 
-def insert_feed_food(feed_id, food_data):
-    with engine.connect() as conn:
-        post_food_data = {
-            "food_id": food_data.food_id,
-            "image_url": food_data.image_url,
-            "weight": food_data.weight,
-            "is_deleted": 0,
-            "feed_id": feed_id,
-        }
-        statement = text(
-            """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
-        )
+def insert_feed_food(session, feed_id, food_data):
+    post_food_data = {
+        "food_id": food_data.food_id,
+        "image_url": food_data.image_url,
+        "weight": food_data.weight,
+        "is_deleted": 0,
+        "feed_id": feed_id,
+    }
+    statement = text(
+        """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
+    )
 
-        conn.execute(statement, post_food_data)
-        conn.commit()
+    session.execute(statement, post_food_data)
 
 
 def delete_feed_food(session, feed_id: int):
@@ -100,13 +97,11 @@ def delete_feed(session, feed_id: int):
     session.execute(statement, data)
 
 
-def patch_feed(patch_feed_data):
-    with engine.connect() as conn:
-        statement = text(
-            """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=:feed_id"""
-        )
-        conn.execute(statement, patch_feed_data)
-        conn.commit()
+def patch_feed(session, patch_feed_data):
+    statement = text(
+        """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=:feed_id"""
+    )
+    session.execute(statement, patch_feed_data)
 
 
 def match_feed_user(feed_id: int, user_id: int):
@@ -114,7 +109,7 @@ def match_feed_user(feed_id: int, user_id: int):
         data = {"feed_id": feed_id}
         statement = text("""SELECT user_id FROM Feed WHERE feed_id=:feed_id""")
         result = conn.execute(statement, data)
-        if user_id == result.mappings().first():
+        if user_id == result.mappings().first().user_id:
             return True
         else:
             return False

@@ -24,3 +24,9 @@ archive.zip
 *~
 .*.sw?
 .github
+
+
+
+#sy
+.DS_Store
+app/service/s3.py
