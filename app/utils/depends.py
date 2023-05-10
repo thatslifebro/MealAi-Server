@@ -87,5 +87,5 @@ def jwt_verify(token: str):
         return payload
     except ExpiredSignatureError:
         raise ExpiredAccessTokenException
-    except InvalidSignatureError:
+    except (InvalidSignatureError, DecodeError):
         raise InvalidTokenException

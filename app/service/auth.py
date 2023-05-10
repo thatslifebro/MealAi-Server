@@ -151,5 +151,5 @@ class AuthService:
             )
         except ExpiredSignatureError:
             raise ExpiredAccessTokenException
-        except InvalidSignatureError:
+        except (InvalidSignatureError, DecodeError):
             raise InvalidTokenException
