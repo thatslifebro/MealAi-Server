@@ -24,7 +24,7 @@ async def current_user_id(
 
     token_type, token = authorization_.split()
 
-    # is_blacklist_token(token, redis)
+    is_blacklist_token(token, redis)
 
     payload = jwt_verify(token)
 
