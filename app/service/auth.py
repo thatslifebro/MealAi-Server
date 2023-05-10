@@ -19,6 +19,8 @@ config = Config(".env")
 
 ACCESS_TOKEN_SECRET = config("ACCESS_TOKEN_SECRET")
 REFRESH_TOKEN_SECRET = config("REFRESH_TOKEN_SECRET")
+ACCESS_TOKEN_EXPIRES_MINUTES = int(config("ACCESS_TOKEN_EXPIRES_MINUTES"))
+REFRESH_TOKEN_EXPIRES_DAY = int(config("REFRESH_TOKEN_EXPIRES_DAY"))
 ALGORITHM = config("ALGORITHM")
 SMTP_SERVER = config("SMTP_SERVER")
 SMTP_SSL_PORT = config("SMTP_SSL_PORT")
@@ -56,10 +58,9 @@ class AuthService:
         return None
 
     def create_access_token(self, user_id: int):
-        minutes = 30
         payload = {
             "user_id": user_id,
-            "exp": datetime.utcnow() + timedelta(minutes=minutes),
+            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRES_MINUTES),
         }
         access_token = jwt.encode(
             payload,
@@ -69,10 +70,9 @@ class AuthService:
         return access_token
 
     def create_refresh_token(self, user_id: int):
-        minutes = 60 * 24 * 30
         payload = {
             "user_id": user_id,
-            "exp": datetime.utcnow() + timedelta(minutes=minutes),
+            "exp": datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRES_DAY),
         }
         refresh_token = jwt.encode(payload, REFRESH_TOKEN_SECRET, ALGORITHM)
         return refresh_token
