@@ -26,7 +26,5 @@ archive.zip
 .github
 
 
-
-#sy
 .DS_Store
-app/utils/upload_image.py
+
