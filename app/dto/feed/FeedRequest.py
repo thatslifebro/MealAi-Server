@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Union
 from enum import Enum
 
 
@@ -24,15 +24,14 @@ class FilterEnum(str, Enum):
 
 class Food(BaseModel):
     food_id: int = Field(..., title="음식 id")
-    image_url: str = Field(..., title="음식 별 사진 URL")
+    image_url: Union[str, None] = Field(..., title="음식 별 사진 URL")
     weight: float = Field(..., title="음식의 양")
 
 
 class PostFeed(BaseModel):
-    image_url: str = Field(..., title="전체 이미지 URL")
     meal_time: MealTimeEnum = Field(..., title="식사 종류", description="B,L,D,S")
     date: str = Field(..., title="식사 날짜")
-    foods: List[Food] = Field(..., title="먹은 음식")
+    # foods: List[Food] = Field(..., title="먹은 음식")
     open: bool = Field(..., title="공개 여부", description="True or False")
 
 
