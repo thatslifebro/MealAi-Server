@@ -8,8 +8,8 @@ from app.error.user import *
 goal_num = {
     "balance": [1, 1, 1, 1],
     "diet": [0.8, 0.8, 1, 0.8],
-    "muscle": [1.3, 1.3, 1.3, 1.3],
-    "lchf": [0.8, 0.8, 1, 1.3],
+    "muscle": [1, 1, 1.5, 1],
+    "lchf": [1, 0.5, 1, 1.3],
 }
 
 
