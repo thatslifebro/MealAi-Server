@@ -1,12 +1,34 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile
 
 from app.dto.report.ReportResponse import *
 from app.service.report import *
 from app.utils.depends import *
 
+from app.utils.upload_image import *
+
 router = APIRouter(
     prefix="/api/reports",
 )
+
+
+@router.post(
+    "/image",
+    description="이미지 업로드하기",
+    tags=["report"],
+)
+def post_image(file: UploadFile):
+    contents = file.file.read()
+    file.file.seek(0)
+    return upload_file(file, 1)
+
+
+@router.get(
+    "/image",
+    description="이미지 다운로드",
+    tags=["report"],
+)
+def get_image():
+    get_file()
 
 
 @router.get(

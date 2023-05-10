@@ -4,10 +4,12 @@ from app.dao.feed import *
 from app.dao.like import get_feed_likes_user
 from app.dao.user import read_by_user_id
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
-from fastapi import HTTPException
+from fastapi import UploadFile
+from typing import Union
 from app.error.feed import *
 from app.database.database import SessionLocal
 from app.utils.depends import current_user_id
+from app.utils.upload_image import *
 
 
 class FeedService:
@@ -126,23 +128,33 @@ class FeedService:
 
         return array
 
-    async def service_post_feed(self, req: PostFeed, user_id: int):
+    async def service_post_feed(
+        self, req: PostFeed, user_id: int, file: Union[UploadFile, None]
+    ):
+        if not file:
+            image_url = None
+            thumbnail_url = None
+        else:
+            image_url = upload_file(file, user_id)
+            thumbnail_url = None
+
         user = await read_by_user_id(user_id)
         post_feed_data = {
-            "image_url": req.image_url,
+            "image_url": image_url,
             "meal_time": req.meal_time,
             "date": req.date,
             "open": req.open,
             "feed_id": "null",  # auto increment
             "user_id": user_id,  # 유저 인증기능 구현 필요
-            "thumbnail_url": "abc",
+            "thumbnail_url": thumbnail_url,
             "created_at": datetime.datetime.utcnow(),
             "updated_at": datetime.datetime.utcnow(),
             "is_deleted": 0,
             "goal": user.goal,
         }
 
-        foods_data = req.foods
+        # 분석한 이미지를 여기에 저장해야함
+        foods_data = None
         try:
             session = SessionLocal()
             post_feed(session, post_feed_data)
@@ -201,6 +213,3 @@ class FeedService:
             raise UpdateFeedException
 
         return await self.service_get_feed_by_id(feed_id)
-
-    def error(self):
-        return error_test()

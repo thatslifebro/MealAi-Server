@@ -32,17 +32,6 @@ def get_food_info_by_id(food_id: int):
         return food_info
 
 
-def error_test():
-    with engine.connect() as conn:
-        try:
-            statement = text("""DELETE FROM Feedasdf WHERE a=2""")
-            conn.execute(statement)
-
-        except SQLAlchemyError as e:
-            error = str(e.__dict__["orig"])
-            return error
-
-
 def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
         data = {"skip": skip, "limit": limit}

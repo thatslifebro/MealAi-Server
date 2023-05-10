@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile
 from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
 from app.service.feed import *
 from app.service.like import *
 from app.utils.depends import *
+from typing import Union
 
 router = APIRouter(
     prefix="/api/feeds",
@@ -16,8 +17,12 @@ router = APIRouter(
     response_model=str,
     tags=["feed"],
 )
-async def post_feed(req: PostFeed, user_id: int = Depends(current_user_id)) -> str:
-    return await FeedService().service_post_feed(req, user_id)
+async def post_feed(
+    req: PostFeed,
+    file: Union[UploadFile, None] = None,
+    user_id: int = Depends(current_user_id),
+) -> str:
+    return await FeedService().service_post_feed(req, user_id, file)
 
 
 @router.get(
@@ -30,15 +35,10 @@ async def get_feeds(
     goal: GoalEnum = "balance",
     filter: FilterEnum = "newest",
     page: int = 1,
-    per_page: int = 7,
+    per_page: int = 10,
     user_id: int = Depends(current_user_id_for_feed),
 ):
     return await FeedService().service_get_feeds(page, per_page, user_id)
-
-
-@router.get("/error")
-def get_feeds():
-    return FeedService().error()
 
 
 @router.get(
