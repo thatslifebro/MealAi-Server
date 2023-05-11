@@ -2,7 +2,7 @@ import datetime
 
 from app.dao.feed import *
 from app.dao.like import get_feed_likes_user
-from app.dao.user import read_by_user_id
+from app.dao.user import read_by_user_id, get_user_daily_nutrient
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 from fastapi import UploadFile
 from typing import Union
@@ -32,10 +32,10 @@ class FeedService:
             ratio = feed_food.weight / food_info.weight
 
             nutrient = {
-                "kcal": round(food_info.kcal * ratio, 2),
-                "carbohydrate": round(food_info.carbohydrate * ratio, 2),
-                "protein": round(food_info.protein * ratio, 2),
-                "fat": round(food_info.fat * ratio, 2),
+                "kcal": round(food_info.kcal * ratio),
+                "carbohydrate": round(food_info.carbohydrate * ratio),
+                "protein": round(food_info.protein * ratio),
+                "fat": round(food_info.fat * ratio),
             }
 
             kcal += nutrient["kcal"]
@@ -68,6 +68,10 @@ class FeedService:
         feed_food_data = get_feed_food_by_id(feed_id)
 
         userInfo = await read_by_user_id(feed_data.user_id)
+        is_mine = user_id == feed_data.user_id
+
+        user_daily_nutrient = await get_user_daily_nutrient(feed_data.user_id)
+        print(user_daily_nutrient)
 
         data_foods, total_nutrient = self.service_get_food_info_by_data(feed_food_data)
 
@@ -83,6 +87,13 @@ class FeedService:
             "my_like": my_like,
             "goal": "balance",
             "likes": likes,
+            "is_mine": is_mine,
+            "user_daily_nutrient": {
+                "kcal": round(user_daily_nutrient.kcal),
+                "carbohydrate": round(user_daily_nutrient.carbohydrate),
+                "protein": round(user_daily_nutrient.protein),
+                "fat": round(user_daily_nutrient.fat),
+            },
         }
 
         res.update(total_nutrient)
@@ -90,8 +101,12 @@ class FeedService:
 
         return res
 
-    async def service_get_feeds(self, page: int, per_page: int, user_id: int):
-        feeds = get_feeds_by_skip_limit(skip=(page - 1) * per_page, limit=per_page)
+    async def service_get_feeds(
+        self, goal, filter, page: int, per_page: int, user_id: int
+    ):
+        feeds = get_feeds_by_skip_limit(
+            goal, filter, skip=(page - 1) * per_page, limit=per_page
+        )
 
         array = []
 
@@ -103,7 +118,7 @@ class FeedService:
             feed_food_data = get_feed_food_by_id(feed.feed_id)
 
             userInfo = await read_by_user_id(feed.user_id)
-
+            is_mine = user_id == feed.user_id
             data_foods, total_nutrient = self.service_get_food_info_by_data(
                 feed_food_data
             )
@@ -117,8 +132,10 @@ class FeedService:
                 "foods": data_foods,
                 "user_name": userInfo.nickname,
                 "my_like": my_like,
-                "goal": "balance",
+                "goal": userInfo.goal,
+                "user_daily_nutrient": None,
                 "likes": likes,
+                "is_mine": is_mine,
             }
 
             res.update(total_nutrient)

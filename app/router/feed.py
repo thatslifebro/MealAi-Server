@@ -38,7 +38,7 @@ async def get_feeds(
     per_page: int = 10,
     user_id: int = Depends(current_user_id_for_feed),
 ):
-    return await FeedService().service_get_feeds(page, per_page, user_id)
+    return await FeedService().service_get_feeds(goal, filter, page, per_page, user_id)
 
 
 @router.get(

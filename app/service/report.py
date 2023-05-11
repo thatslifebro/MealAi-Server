@@ -43,10 +43,10 @@ class ReportService:
             for feed in array[i]:
                 if len(feed) == 0:
                     continue
-                kcal += feed["kcal"]
-                carbohydrate += feed["carbohydrate"]
-                protein += feed["protein"]
-                fat += feed["fat"]
+                kcal += round(feed["kcal"])
+                carbohydrate += round(feed["carbohydrate"])
+                protein += round(feed["protein"])
+                fat += round(feed["fat"])
             tkcal += kcal
             tcarbohydrate += carbohydrate
             tprotein += protein
@@ -67,10 +67,10 @@ class ReportService:
         }
         user_daily_goal = await get_user_daily_nutrient(user_id)
         user_weekly_goal = {
-            "kcal": round(user_daily_goal["kcal"] * 7, 2),
-            "carbohydrate": round(user_daily_goal["carbohydrate"] * 7, 2),
-            "protein": round(user_daily_goal["protein"] * 7, 2),
-            "fat": round(user_daily_goal["fat"] * 7, 2),
+            "kcal": round(user_daily_goal["kcal"] * 7),
+            "carbohydrate": round(user_daily_goal["carbohydrate"] * 7),
+            "protein": round(user_daily_goal["protein"] * 7),
+            "fat": round(user_daily_goal["fat"] * 7),
         }
 
         return {
