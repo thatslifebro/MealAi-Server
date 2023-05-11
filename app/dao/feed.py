@@ -32,12 +32,36 @@ def get_food_info_by_id(food_id: int):
         return food_info
 
 
-def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
+def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
-        data = {"skip": skip * limit, "limit": limit}
-        statement = text(
-            """SELECT * FROM Feed ORDER BY created_at DESC LIMIT :skip, :limit"""
-        )
+        filter_data = "created_at" if filter == "newest" else "likes DESC, created_at"
+        if goal == "all":
+            data = {"skip": skip * limit, "limit": limit}
+            if filter == "popularity":
+                statement = text(
+                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id ORDER BY L.cou DESC, created_at DESC LIMIT :skip, :limit"""
+                )
+            else:
+                statement = text(
+                    """SELECT * FROM Feed ORDER BY created_at DESC LIMIT :skip, :limit"""
+                )
+
+        else:
+            data = {
+                "skip": skip * limit,
+                "limit": limit,
+                "filter_data": filter_data,
+                "goal": goal,
+            }
+            if filter == "popularity":
+                statement = text(
+                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id LEFT JOIN User ON F.user_id=User.user_id WHERE User.goal=:goal ORDER BY L.cou DESC created_at DESC LIMIT :skip, :limit"""
+                )
+            else:
+                statement = text(
+                    """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal ORDER BY :filter_data DESC LIMIT :skip, :limit"""
+                )
+
         result = conn.execute(statement, data)
         feeds = result.mappings().all()
         return feeds
