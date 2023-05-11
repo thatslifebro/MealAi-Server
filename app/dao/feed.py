@@ -36,7 +36,7 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
         filter_data = "created_at" if filter == "newest" else "likes DESC, created_at"
         if goal == "all":
-            data = {"skip": skip * limit, "limit": limit}
+            data = {"skip": skip, "limit": limit}
             if filter == "popularity":
                 statement = text(
                     """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id ORDER BY L.cou DESC, created_at DESC LIMIT :skip, :limit"""

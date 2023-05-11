@@ -85,7 +85,7 @@ class FeedService:
             "foods": data_foods,
             "user_name": userInfo.nickname,
             "my_like": my_like,
-            "goal": "balance",
+            "goal": userInfo.goal,
             "likes": likes,
             "is_mine": is_mine,
             "user_daily_nutrient": {
