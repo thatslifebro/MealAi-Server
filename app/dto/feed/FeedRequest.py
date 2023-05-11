@@ -8,6 +8,7 @@ class GoalEnum(str, Enum):
     diet = "diet"
     muscle = "muscle"
     lchf = "lchf"
+    all = "all"
 
 
 class MealTimeEnum(str, Enum):

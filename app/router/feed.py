@@ -32,7 +32,7 @@ async def post_feed(
     tags=["feed"],
 )
 async def get_feeds(
-    goal: GoalEnum = "balance",
+    goal: GoalEnum = "all",
     filter: FilterEnum = "newest",
     page: int = 1,
     per_page: int = 10,
