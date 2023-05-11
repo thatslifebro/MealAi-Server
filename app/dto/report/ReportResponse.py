@@ -39,7 +39,15 @@ class ReportGoal(BaseModel):
         orm_mode = True
 
 
-class ReportResponse(BaseModel):
+class ReportHistoryResponse(BaseModel):
     goal: ReportGoal = Field(..., title="유저의 하루 목표치")
     nutrient: List[ReportGoal] = Field(..., title="유저의 요일별 총 영양소")
     data: List[List[ReportData]] = Field(..., title="월화수목금토일 유저의 데이터")
+
+
+class ReportResponse(BaseModel):
+    goal: GoalEnum = Field(..., title="유저의 식단 목표")
+    weekly_goal: ReportGoal = Field(..., title="유저의 주간 목표치")
+    weekly_nutrient: ReportGoal = Field(..., title="유저의 주간 총 영양소")
+    daily_goal: ReportGoal = Field(..., title="유저의 하루 목표치")
+    daily_nutrient: List[ReportGoal] = Field(..., title="유저의 요일별 총 영양소")

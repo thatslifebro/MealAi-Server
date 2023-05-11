@@ -34,7 +34,7 @@ def get_food_info_by_id(food_id: int):
 
 def get_feeds_by_skip_limit(skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
-        data = {"skip": skip, "limit": limit}
+        data = {"skip": skip * limit, "limit": limit}
         statement = text(
             """SELECT * FROM Feed ORDER BY created_at DESC LIMIT :skip, :limit"""
         )
