@@ -71,7 +71,6 @@ class FeedService:
         is_mine = user_id == feed_data.user_id
 
         user_daily_nutrient = await get_user_daily_nutrient(feed_data.user_id)
-        print(user_daily_nutrient)
 
         data_foods, total_nutrient = self.service_get_food_info_by_data(feed_food_data)
 

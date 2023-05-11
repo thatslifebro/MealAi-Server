@@ -20,7 +20,7 @@ class LikeService:
 
         return "ok"
 
-    def service_get_my_likes_feeds(self, user_id: int):
+    async def service_get_my_likes_feeds(self, user_id: int):
         feeds = get_my_likes_feeds(user_id)
 
         array = []
@@ -33,12 +33,23 @@ class LikeService:
                 feed_food_data
             )
 
+            is_mine = user_id == feed.user_id
+
+            user_daily_nutrient = await get_user_daily_nutrient(feed.user_id)
+
             res = {
                 "foods": data_foods,
                 "user_name": "user_name",
                 "my_like": True,
                 "goal": "balance",
                 "likes": likes,
+                "is_mine": is_mine,
+                "user_daily_nutrient": {
+                    "kcal": round(user_daily_nutrient.kcal),
+                    "carbohydrate": round(user_daily_nutrient.carbohydrate),
+                    "protein": round(user_daily_nutrient.protein),
+                    "fat": round(user_daily_nutrient.fat),
+                },
             }
 
             res.update(total_nutrient)
