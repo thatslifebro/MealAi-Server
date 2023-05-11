@@ -47,8 +47,8 @@ async def get_feeds(
     response_model=List[FeedData],
     tags=["feed"],
 )
-def get_my_likes(user_id: int = Depends(current_user_id)):
-    return LikeService().service_get_my_likes_feeds(user_id)
+async def get_my_likes(user_id: int = Depends(current_user_id)):
+    return await LikeService().service_get_my_likes_feeds(user_id)
 
 
 @router.patch(
