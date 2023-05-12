@@ -65,7 +65,7 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
 
         else:
             data = {
-                "skip": skip * limit,
+                "skip": skip,
                 "limit": limit,
                 "filter_data": filter_data,
                 "goal": goal,
