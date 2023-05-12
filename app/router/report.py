@@ -11,26 +11,6 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/image",
-    description="이미지 업로드하기",
-    tags=["report"],
-)
-def post_image(file: UploadFile):
-    contents = file.file.read()
-    file.file.seek(0)
-    return upload_file(file, 1)
-
-
-@router.get(
-    "/image",
-    description="이미지 다운로드",
-    tags=["report"],
-)
-def get_image():
-    get_file()
-
-
 @router.get(
     "/history/{week}",
     description="주간 통계",
