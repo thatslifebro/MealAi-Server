@@ -20,14 +20,24 @@ class LikeService:
 
         return "ok"
 
-    async def service_get_my_likes_feeds(self, user_id: int):
-        feeds = get_my_likes_feeds(user_id)
+    async def service_get_my_likes_feeds(self, page: int, per_page: int, user_id: int):
+        feeds, feeds_num = get_my_likes_feeds(
+            user_id, skip=(page - 1) * per_page, limit=per_page
+        )
+
+        prev_page = False if page == 1 else True
+        next_page = False if page * per_page >= feeds_num else True
 
         array = []
 
         for feed in feeds:
+            if not feed.open and feed.user_id != user_id:
+                continue
+
             likes = get_feed_likes(feed.feed_id)
             feed_food_data = get_feed_food_by_id(feed.feed_id)
+
+            userInfo = await read_by_user_id(feed.user_id)
 
             data_foods, total_nutrient = FeedService().service_get_food_info_by_data(
                 feed_food_data
@@ -39,9 +49,9 @@ class LikeService:
 
             res = {
                 "foods": data_foods,
-                "user_name": "user_name",
+                "user_name": userInfo.nickname,
                 "my_like": True,
-                "goal": "balance",
+                "goal": userInfo.goal,
                 "likes": likes,
                 "is_mine": is_mine,
                 "user_daily_nutrient": {
@@ -57,4 +67,4 @@ class LikeService:
 
             array.append(res)
 
-        return array
+        return {"prev_page": prev_page, "next_page": next_page, "feeds": array}

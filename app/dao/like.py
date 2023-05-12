@@ -48,12 +48,23 @@ def delete_likes(session, feed_id: int):
     session.execute(statement, data)
 
 
-def get_my_likes_feeds(user_id: int):
+def count_my_likes_feeds(user_id: int):
     with engine.connect() as conn:
         data = {"user_id": user_id}
         statement = text(
-            """SELECT * FROM Feed AS F LEFT OUTER JOIN Likes AS L ON F.feed_id = L.feed_id WHERE L.user_id = :user_id"""
+            """SELECT COUNT(*) AS feeds_num FROM Feed AS F LEFT OUTER JOIN Likes AS L ON F.feed_id = L.feed_id WHERE L.user_id = :user_id"""
+        )
+        result = conn.execute(statement, data)
+        row = result.mappings().first()
+        return row.feeds_num
+
+
+def get_my_likes_feeds(user_id: int, skip: int, limit: int):
+    with engine.connect() as conn:
+        data = {"user_id": user_id, "skip": skip, "limit": limit}
+        statement = text(
+            """SELECT * FROM Feed AS F LEFT OUTER JOIN Likes AS L ON F.feed_id = L.feed_id WHERE L.user_id = :user_id LIMIT :skip,:limit"""
         )
         result = conn.execute(statement, data)
         feeds = result.mappings().all()
-        return feeds
+        return feeds, count_my_likes_feeds(user_id)
