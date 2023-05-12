@@ -1,7 +1,7 @@
 import datetime
 
 from app.dao.feed import *
-from app.dao.like import get_feed_likes_user
+from app.dao.like import get_feed_likes_user, delete_likes
 from app.dao.user import read_by_user_id, get_user_daily_nutrient
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
 from fastapi import UploadFile
@@ -196,6 +196,7 @@ class FeedService:
         session = SessionLocal()
         try:
             delete_feed_food(session, feed_id)
+            delete_likes(session, feed_id)
             delete_feed(session, feed_id)
             session.commit()
         except SQLAlchemyError:
