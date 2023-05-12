@@ -82,7 +82,8 @@ class ReportService:
         }
 
     async def service_get_report_history(self, week: int, user_id: int):
-        user_goal = await UserService().get_user_info()["goal"]
+        user_info = await UserService().get_user_info(user_id)
+        user_goal = user_info.goal
 
         latest_week = get_feeds_of_latest_week(user_id)
         search_week = latest_week
