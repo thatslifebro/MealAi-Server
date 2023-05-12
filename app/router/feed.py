@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Form
 from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
 from app.service.feed import *
@@ -14,14 +14,16 @@ router = APIRouter(
 @router.post(
     "",
     description="피드 작성",
-    response_model=str,
+    # response_model=str,
     tags=["feed"],
 )
 async def post_feed(
-    req: PostFeed,
-    file: UploadFile,
+    meal_time: MealTimeEnum = Form(),
+    date: str = Form(),
+    file: UploadFile = File(),
     user_id: int = Depends(current_user_id),
-) -> str:
+):
+    req = {"meal_time": meal_time, "date": date}
     return await FeedService().service_post_feed(req, user_id, file)
 
 
