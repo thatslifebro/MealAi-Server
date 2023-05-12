@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Union
 from enum import Enum
+from fastapi import Depends, Form
 
 
 class GoalEnum(str, Enum):
@@ -33,6 +34,7 @@ class Food(BaseModel):
 class PostFeed(BaseModel):
     meal_time: MealTimeEnum = Field(..., title="식사 종류", description="B,L,D,S")
     date: str = Field(..., title="식사 날짜")
+
     # foods: List[Food] = Field(..., title="먹은 음식")
     # open: bool = Field(..., title="공개 여부", description="True or False")
 

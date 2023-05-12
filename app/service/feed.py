@@ -1,15 +1,13 @@
 import datetime
-
+from fastapi import File, UploadFile
 from app.dao.feed import *
 from app.dao.like import get_feed_likes_user, delete_likes
 from app.dao.user import read_by_user_id, get_user_daily_nutrient
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
-from fastapi import UploadFile
-from typing import Union
+
 from app.error.feed import *
 from app.database.database import SessionLocal
-from app.utils.depends import current_user_id
-from app.utils.upload_image import *
+
 from app.utils.predict import *
 
 
@@ -134,10 +132,13 @@ class FeedService:
 
         return {"prev_page": prev_page, "next_page": next_page, "feeds": array}
 
-    async def service_post_feed(self, req: PostFeed, user_id: int, file: UploadFile):
+    async def service_post_feed(
+        self, req: PostFeed, user_id: int, file: UploadFile = File(...)
+    ):
         image_url = None
         thumbnail_url = None
 
+        # contents = await file.read()
         image_data = await predict_image(file)
         image_url = image_data.origin.image_key
 
