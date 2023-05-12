@@ -122,7 +122,7 @@ def match_feed_user(feed_id: int, user_id: int):
         data = {"feed_id": feed_id}
         statement = text("""SELECT user_id FROM Feed WHERE feed_id=:feed_id""")
         result = conn.execute(statement, data)
-        if user_id == result.mappings().first().user_id:
+        if user_id == int(result.mappings().first().user_id):
             return True
         else:
             return False

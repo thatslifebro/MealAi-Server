@@ -42,6 +42,12 @@ def cancel_likes(feed_id: int, user_id: int):
         conn.commit()
 
 
+def delete_likes(session, feed_id: int):
+    data = {"feed_id": feed_id}
+    statement = text("""DELETE FROM Likes WHERE feed_id=:feed_id""")
+    session.execute(statement, data)
+
+
 def get_my_likes_feeds(user_id: int):
     with engine.connect() as conn:
         data = {"user_id": user_id}
