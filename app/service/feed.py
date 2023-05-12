@@ -103,9 +103,12 @@ class FeedService:
     async def service_get_feeds(
         self, goal, filter, page: int, per_page: int, user_id: int
     ):
-        feeds = get_feeds_by_skip_limit(
+        feeds, feeds_num = get_feeds_by_skip_limit(
             goal, filter, skip=(page - 1) * per_page, limit=per_page
         )
+
+        prev_page = False if page == 1 else True
+        next_page = False if page * per_page >= feeds_num else True
 
         array = []
 
@@ -142,7 +145,7 @@ class FeedService:
 
             array.append(res)
 
-        return array
+        return {"prev_page": prev_page, "next_page": next_page, "feeds": array}
 
     async def service_post_feed(
         self, req: PostFeed, user_id: int, file: Union[UploadFile, None]
