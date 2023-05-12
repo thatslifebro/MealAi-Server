@@ -10,6 +10,7 @@ from app.error.feed import *
 from app.database.database import SessionLocal
 from app.utils.depends import current_user_id
 from app.utils.upload_image import *
+from app.utils.predict import *
 
 
 class FeedService:
@@ -43,6 +44,7 @@ class FeedService:
             protein += nutrient["protein"]
             fat += nutrient["fat"]
 
+            data_food.update({"food_name": food_info.name})
             data_food.update(feed_food)
             data_food.update(nutrient)
             data_foods.append(data_food)
@@ -147,22 +149,19 @@ class FeedService:
 
         return {"prev_page": prev_page, "next_page": next_page, "feeds": array}
 
-    async def service_post_feed(
-        self, req: PostFeed, user_id: int, file: Union[UploadFile, None]
-    ):
-        if not file:
-            image_url = None
-            thumbnail_url = None
-        else:
-            image_url = upload_file(file, user_id)
-            thumbnail_url = None
+    async def service_post_feed(self, req: PostFeed, user_id: int, file: UploadFile):
+        image_url = None
+        thumbnail_url = None
+
+        image_data = await predict_image(file)
+        image_url = image_data.origin.image_key
 
         user = await read_by_user_id(user_id)
         post_feed_data = {
             "image_url": image_url,
             "meal_time": req.meal_time,
             "date": req.date,
-            "open": req.open,
+            "open": True,
             "feed_id": "null",  # auto increment
             "user_id": user_id,  # 유저 인증기능 구현 필요
             "thumbnail_url": thumbnail_url,
@@ -173,11 +172,23 @@ class FeedService:
         }
 
         # 분석한 이미지를 여기에 저장해야함
-        foods_data = None
         try:
             session = SessionLocal()
             post_feed(session, post_feed_data)
             feed_id = get_recent_post_id(session)
+            foods_data = []
+
+            for crop in image_data.crops:
+                food_data = get_food_info_by_id(crop.food_id)
+                foods_data.append(
+                    {
+                        "food_id": food_data.food_id,
+                        "image_url": crop.image_key,
+                        "weight": food_data.weight,
+                        "is_deleted": 0,
+                        "feed_id": feed_id,
+                    }
+                )
 
             for food_data in foods_data:
                 insert_feed_food(session, feed_id, food_data)
@@ -214,9 +225,9 @@ class FeedService:
 
         patch_feed_data = {
             "feed_id": feed_id,
-            "meal_time": req.meal_time,
+            # "meal_time": req.meal_time,
             "open": req.open,
-            "date": req.date,
+            # "date": req.date,
             "updated_at": datetime.datetime.utcnow(),
         }
         foods_data = req.foods
@@ -233,3 +244,6 @@ class FeedService:
             raise UpdateFeedException
 
         return await self.service_get_feed_by_id(feed_id)
+
+    def service_search_food_by_name(self, food_name: str):
+        return search_food_by_name(food_name)

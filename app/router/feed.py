@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile
+from fastapi import APIRouter, UploadFile, File
 from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
 from app.service.feed import *
@@ -19,7 +19,7 @@ router = APIRouter(
 )
 async def post_feed(
     req: PostFeed,
-    file: Union[UploadFile, None] = None,
+    file: UploadFile,
     user_id: int = Depends(current_user_id),
 ) -> str:
     return await FeedService().service_post_feed(req, user_id, file)
@@ -44,11 +44,13 @@ async def get_feeds(
 @router.get(
     "/likes",
     description="내가 좋아요한 피드",
-    response_model=List[FeedData],
+    response_model=GetFeedsResponse,
     tags=["feed"],
 )
-async def get_my_likes(user_id: int = Depends(current_user_id)):
-    return await LikeService().service_get_my_likes_feeds(user_id)
+async def get_my_likes(
+    page: int = 1, per_page: int = 10, user_id: int = Depends(current_user_id)
+):
+    return await LikeService().service_get_my_likes_feeds(page, per_page, user_id)
 
 
 @router.patch(
@@ -93,3 +95,13 @@ async def patch_feed_by_id(
 )
 def delete_feed_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
     return FeedService().service_delete_feed(feed_id, user_id)
+
+
+@router.get(
+    "/food/{food_name}",
+    description="음식 찾기",
+    response_model=List[FoodInfo],
+    tags=["feed"],
+)
+def search_food_by_name(food_name: str, user_id: int = Depends(current_user_id)):
+    return FeedService().service_search_food_by_name(food_name)

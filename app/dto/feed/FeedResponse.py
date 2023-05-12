@@ -40,3 +40,9 @@ class GetFeedsResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class FoodInfo(BaseModel):
+    food_id: int = Field(..., title="음식 id")
+    name: str = Field(..., title="음식 이름")
+    weight: float = Field(..., title="음식의 양")

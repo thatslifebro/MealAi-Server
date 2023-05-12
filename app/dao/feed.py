@@ -131,7 +131,7 @@ def delete_feed(session, feed_id: int):
 
 def patch_feed(session, patch_feed_data):
     statement = text(
-        """UPDATE Feed SET meal_time=:meal_time, date=:date, open=:open WHERE feed_id=:feed_id"""
+        """UPDATE Feed SET updated_at=:updated_at, open=:open WHERE feed_id=:feed_id"""
     )
     session.execute(statement, patch_feed_data)
 
@@ -145,3 +145,13 @@ def match_feed_user(feed_id: int, user_id: int):
             return True
         else:
             return False
+
+
+def search_food_by_name(name: str):
+    with engine.connect() as conn:
+        data = {"name": "%" + name + "%"}
+        statement = text(
+            """SELECT food_id, name, weight FROM FoodInfo WHERE name LIKE :name """
+        )
+        result = conn.execute(statement, data)
+        return result.mappings().all()
