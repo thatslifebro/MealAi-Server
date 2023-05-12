@@ -57,30 +57,23 @@ class FeedService:
         }
         return data_foods, total_nutrient
 
-    async def service_get_feed_by_id(self, feed_id: int, user_id: int):
-        feed_data = get_feed_by_id(feed_id)
-        if feed_data is None:
-            raise NoFeedIdException
+    async def form_feed_res(self, feed_data, user_id):
+        likes = get_feed_likes(feed_data.feed_id)  #
 
-        if not feed_data.open and feed_data.user_id != user_id:
-            raise UnauthorizedFeedException
+        feed_food_data = get_feed_food_by_id(feed_data.feed_id)  #
 
-        likes = get_feed_likes(feed_id)
+        userInfo = await read_by_user_id(feed_data.user_id)  #
+        is_mine = user_id == feed_data.user_id  #
 
-        feed_food_data = get_feed_food_by_id(feed_id)
-
-        userInfo = await read_by_user_id(feed_data.user_id)
-        is_mine = user_id == feed_data.user_id
-
-        user_daily_nutrient = await get_user_daily_nutrient(feed_data.user_id)
-
-        data_foods, total_nutrient = self.service_get_food_info_by_data(feed_food_data)
+        data_foods, total_nutrient = self.service_get_food_info_by_data(
+            feed_food_data
+        )  #
 
         # my_like 는 인증기능 구현필요, user_name 도 goal 도
-        if user_id == -1:
+        if user_id == -1:  #
             my_like = False
         else:
-            my_like = get_feed_likes_user(feed_id, user_id)
+            my_like = get_feed_likes_user(feed_data.feed_id, user_id)
 
         res = {
             "foods": data_foods,
@@ -89,6 +82,24 @@ class FeedService:
             "goal": userInfo.goal,
             "likes": likes,
             "is_mine": is_mine,
+        }
+        res.update(total_nutrient)
+        res.update(feed_data)
+
+        return res
+
+    async def service_get_feed_by_id(self, feed_id: int, user_id: int):
+        feed_data = get_feed_by_id(feed_id)
+        if feed_data is None:
+            raise NoFeedIdException
+
+        if not feed_data.open and feed_data.user_id != user_id:
+            raise UnauthorizedFeedException
+
+        res = await self.form_feed_res(feed_data, user_id)
+
+        user_daily_nutrient = await get_user_daily_nutrient(feed_data.user_id)
+        user_daily_nutrient_data = {
             "user_daily_nutrient": {
                 "kcal": round(user_daily_nutrient.kcal),
                 "carbohydrate": round(user_daily_nutrient.carbohydrate),
@@ -96,9 +107,7 @@ class FeedService:
                 "fat": round(user_daily_nutrient.fat),
             },
         }
-
-        res.update(total_nutrient)
-        res.update(feed_data)
+        res.update(user_daily_nutrient_data)
 
         return res
 
@@ -118,32 +127,8 @@ class FeedService:
             if not feed.open and feed.user_id != user_id:
                 continue
 
-            likes = get_feed_likes(feed.feed_id)
-            feed_food_data = get_feed_food_by_id(feed.feed_id)
-
-            userInfo = await read_by_user_id(feed.user_id)
-            is_mine = user_id == feed.user_id
-            data_foods, total_nutrient = self.service_get_food_info_by_data(
-                feed_food_data
-            )
-
-            if user_id == -1:
-                my_like = False
-            else:
-                my_like = get_feed_likes_user(feed.feed_id, user_id)
-
-            res = {
-                "foods": data_foods,
-                "user_name": userInfo.nickname,
-                "my_like": my_like,
-                "goal": userInfo.goal,
-                "user_daily_nutrient": None,
-                "likes": likes,
-                "is_mine": is_mine,
-            }
-
-            res.update(total_nutrient)
-            res.update(feed)
+            res = await self.form_feed_res(feed, user_id)
+            res.update({"user_daily_nutrient": None})
 
             array.append(res)
 
