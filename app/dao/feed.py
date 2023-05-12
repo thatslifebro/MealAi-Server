@@ -103,9 +103,9 @@ def get_recent_post_id(session):
 
 def insert_feed_food(session, feed_id, food_data):
     post_food_data = {
-        "food_id": food_data.food_id,
-        "image_url": food_data.image_url,
-        "weight": food_data.weight,
+        "food_id": food_data["food_id"],
+        "image_url": food_data["image_url"],
+        "weight": food_data["weight"],
         "is_deleted": 0,
         "feed_id": feed_id,
     }

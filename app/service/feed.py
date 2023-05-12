@@ -140,19 +140,19 @@ class FeedService:
 
         # contents = await file.read()
         image_data = await predict_image(file)
-        image_url = image_data.origin.image_key
+        image_url = image_data["origin"]["image_key"]
 
         user = await read_by_user_id(user_id)
         post_feed_data = {
             "image_url": image_url,
-            "meal_time": req.meal_time,
-            "date": req.date,
+            "meal_time": req["meal_time"],
+            "date": req["date"],
             "open": True,
             "feed_id": "null",  # auto increment
             "user_id": user_id,  # 유저 인증기능 구현 필요
             "thumbnail_url": thumbnail_url,
-            "created_at": datetime.datetime.utcnow(),
-            "updated_at": datetime.datetime.utcnow(),
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
             "is_deleted": 0,
             "goal": user.goal,
         }
@@ -164,20 +164,21 @@ class FeedService:
             feed_id = get_recent_post_id(session)
             foods_data = []
 
-            for crop in image_data.crops:
-                food_data = get_food_info_by_id(crop.food_id)
+            for crop in image_data["crops"]:
+                food_data = get_food_info_by_id(crop["food_id"])
+
                 foods_data.append(
                     {
                         "food_id": food_data.food_id,
-                        "image_url": crop.image_key,
+                        "image_url": crop["image_key"],
                         "weight": food_data.weight,
                         "is_deleted": 0,
                         "feed_id": feed_id,
                     }
                 )
 
-            for food_data in foods_data:
-                insert_feed_food(session, feed_id, food_data)
+            for food in foods_data:
+                insert_feed_food(session, feed_id, food)
 
             session.commit()
         except SQLAlchemyError:
