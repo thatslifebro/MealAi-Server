@@ -28,7 +28,7 @@ async def post_feed(
 @router.get(
     "",
     description="전체 피드 조회",
-    response_model=List[FeedData],
+    response_model=GetFeedsResponse,
     tags=["feed"],
 )
 async def get_feeds(

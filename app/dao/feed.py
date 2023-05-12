@@ -32,6 +32,23 @@ def get_food_info_by_id(food_id: int):
         return food_info
 
 
+def get_feeds_num_by_goal(goal):
+    with engine.connect() as conn:
+        if goal == "all":
+            statement = text("""SELECT COUNT(*) AS feeds_num FROM Feed""")
+            result = conn.execute(statement)
+            row = result.mappings().first()
+            return row.feeds_num
+        else:
+            data = {"goal": goal}
+            statement = text(
+                """SELECT COUNT(*) AS feeds_num FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal"""
+            )
+            result = conn.execute(statement, data)
+            row = result.mappings().first()
+            return row.feeds_num
+
+
 def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
     with engine.connect() as conn:
         filter_data = "created_at" if filter == "newest" else "likes DESC, created_at"
@@ -62,9 +79,11 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
                     """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal ORDER BY :filter_data DESC LIMIT :skip, :limit"""
                 )
 
+        feeds_num = get_feeds_num_by_goal(goal)
+
         result = conn.execute(statement, data)
         feeds = result.mappings().all()
-        return feeds
+        return feeds, feeds_num
 
 
 def post_feed(session, post_feed_data):

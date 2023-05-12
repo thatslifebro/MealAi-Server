@@ -31,3 +31,12 @@ class FeedData(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class GetFeedsResponse(BaseModel):
+    prev_page: bool = Field(..., title="이전페이지 여부", description="True or False")
+    next_page: bool = Field(..., title="다음 페이지 여부", description="True or False")
+    feeds: List[FeedData] = Field(..., title="FeedData 배열", description="피드 배열")
+
+    class Config:
+        orm_mode = True
