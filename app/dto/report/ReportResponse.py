@@ -51,3 +51,5 @@ class ReportResponse(BaseModel):
     weekly_nutrient: ReportGoal = Field(..., title="유저의 주간 총 영양소")
     daily_goal: ReportGoal = Field(..., title="유저의 하루 목표치")
     daily_nutrient: List[ReportGoal] = Field(..., title="유저의 요일별 총 영양소")
+    start_of_week: str
+    end_of_week: str
