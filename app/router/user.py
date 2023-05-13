@@ -105,7 +105,7 @@ async def predict_image(file: UploadFile):
             image.save(output, format="PNG")
             output.seek(0)
             fl = UploadFile(file=output, filename=f"{image_key}.png")
-            upload_file(fl, 1)
+            upload_file(fl)
 
     image_key = str(uuid4())
     image_up(img, image_key)

@@ -14,7 +14,7 @@ router = APIRouter(
 @router.post(
     "",
     description="피드 작성",
-    # response_model=str,
+    response_model=List[FoodInfo],
     tags=["feed"],
 )
 async def post_feed(
@@ -92,7 +92,7 @@ async def patch_feed_by_id(
 @router.delete(
     "/{feed_id}",
     description="피드 삭제",
-    response_model=str,
+    # response_model=str,
     tags=["feed"],
 )
 def delete_feed_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
