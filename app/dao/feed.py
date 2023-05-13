@@ -72,7 +72,7 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
             }
             if filter == "popularity":
                 statement = text(
-                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id LEFT JOIN User ON F.user_id=User.user_id WHERE User.goal=:goal ORDER BY L.cou DESC, created_at DESC , feed_id DESCLIMIT :skip, :limit"""
+                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id LEFT JOIN User ON F.user_id=User.user_id WHERE User.goal=:goal ORDER BY L.cou DESC, F.created_at DESC , F.feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
