@@ -115,6 +115,20 @@ def insert_feed_food(session, feed_id, food_data):
 
     session.execute(statement, post_food_data)
 
+def insert_feed_food_patch(session, feed_id, food_data):
+    post_food_data = {
+        "food_id": food_data.food_id,
+        "image_url": food_data.image_url,
+        "weight": food_data.weight,
+        "is_deleted": 0,
+        "feed_id": feed_id,
+    }
+    statement = text(
+        """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
+    )
+
+    session.execute(statement, post_food_data)
+
 
 def delete_feed_food(session, feed_id: int):
     data = ({"feed_id": feed_id},)
@@ -151,7 +165,25 @@ def search_food_by_name(name: str):
     with engine.connect() as conn:
         data = {"name": "%" + name + "%"}
         statement = text(
-            """SELECT food_id, name, weight FROM FoodInfo WHERE name LIKE :name """
+            """SELECT * FROM FoodInfo WHERE name LIKE :name """
         )
         result = conn.execute(statement, data)
         return result.mappings().all()
+
+def get_food_by_id(session,food_id: int):
+    data = {"food_id": food_id}
+    statement = text(
+        """SELECT * FROM FoodInfo WHERE food_id = :food_id """
+    )
+    result = session.execute(statement, data)
+    food = result.mappings().first()
+    food_info = {
+        "food_id": food.food_id,
+        "name": food.name,
+        "weight": food.weight,
+        "kcal": round( food.kcal),
+        "carbohydrate": round(food.carbohydrate),
+        "protein": round(food.protein),
+        "fat": round(food.fat)
+    }
+    return food_info

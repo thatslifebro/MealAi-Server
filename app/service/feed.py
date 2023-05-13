@@ -176,16 +176,18 @@ class FeedService:
                         "feed_id": feed_id,
                     }
                 )
+            array = []
 
             for food in foods_data:
                 insert_feed_food(session, feed_id, food)
+                array.append(get_food_by_id(session, food["food_id"]))
 
             session.commit()
         except SQLAlchemyError:
             session.rollback()
             raise UpdateFeedException
 
-        return "ok"
+        return array
 
     def service_delete_feed(self, feed_id: int, user_id):
         feed_data = get_feed_by_id(feed_id)
@@ -193,6 +195,10 @@ class FeedService:
             raise NoFeedIdException
         elif not match_feed_user(feed_id, user_id):
             raise UnauthorizedFeedException
+
+        feed_foods = get_feed_food_by_id(feed_id)
+        array = []
+        data, nutrient = self.service_get_food_info_by_data(feed_foods)
 
         session = SessionLocal()
         try:
@@ -204,7 +210,7 @@ class FeedService:
             session.rollback()
             raise DeleteFeedException
 
-        return "ok"
+        return data
 
     async def service_patch_feed(self, feed_id: int, req: PatchFeedData, user_id: int):
         if not match_feed_user(feed_id, user_id):
@@ -215,22 +221,23 @@ class FeedService:
             # "meal_time": req.meal_time,
             "open": req.open,
             # "date": req.date,
-            "updated_at": datetime.datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
         }
         foods_data = req.foods
+
 
         session = SessionLocal()
         try:
             patch_feed(session, patch_feed_data)
             delete_feed_food(session, feed_id)
             for food_data in foods_data:
-                insert_feed_food(session, feed_id, food_data)
+                insert_feed_food_patch(session, feed_id, food_data)
             session.commit()
         except SQLAlchemyError:
             session.rollback()
             raise UpdateFeedException
 
-        return await self.service_get_feed_by_id(feed_id)
+        return await self.service_get_feed_by_id(feed_id,user_id)
 
     def service_search_food_by_name(self, food_name: str):
         return search_food_by_name(food_name)

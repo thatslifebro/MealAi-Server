@@ -1,6 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
-
+from uuid import uuid4
 from starlette.config import Config
 from datetime import datetime
 
@@ -17,9 +17,7 @@ client_s3 = boto3.client(
 def upload_file(file, user_id):
     try:
         name = (
-            str(user_id)
-            + "/"
-            + str(datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S"))
+            + str(uuid4())
             + "-"
             + file.filename
         )
