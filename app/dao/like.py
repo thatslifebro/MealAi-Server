@@ -63,7 +63,7 @@ def get_my_likes_feeds(user_id: int, skip: int, limit: int):
     with engine.connect() as conn:
         data = {"user_id": user_id, "skip": skip, "limit": limit}
         statement = text(
-            """SELECT * FROM Feed AS F LEFT OUTER JOIN Likes AS L ON F.feed_id = L.feed_id WHERE L.user_id = :user_id LIMIT :skip,:limit"""
+            """SELECT * FROM Feed AS F LEFT OUTER JOIN Likes AS L ON F.feed_id = L.feed_id WHERE L.user_id = :user_id ORDER BY F.created_at DESC, F.feed_id LIMIT :skip,:limit"""
         )
         result = conn.execute(statement, data)
         feeds = result.mappings().all()
