@@ -105,5 +105,15 @@ def delete_feed_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
     response_model=List[FoodInfo],
     tags=["feed"],
 )
-def search_food_by_name(food_name: str, user_id: int = Depends(current_user_id)):
+def search_food_by_name(food_name: str,):
     return FeedService().service_search_food_by_name(food_name)
+
+@router.post(
+    "/food",
+    description="음식 영양소 정보 얻기",
+    response_model=NutrientInfo,
+    tags=["feed"],
+)
+def search_food_by_name(foods: List[FoodRequest]):
+    data, nutrient = FeedService().service_get_food_info_by_data(foods)
+    return nutrient

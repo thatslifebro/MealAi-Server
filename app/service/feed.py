@@ -239,3 +239,5 @@ class FeedService:
 
     def service_search_food_by_name(self, food_name: str):
         return search_food_by_name(food_name)
+
+
