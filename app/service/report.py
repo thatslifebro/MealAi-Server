@@ -1,10 +1,11 @@
+import datetime
+
+from app.dao.feed import *
 from app.dao.like import get_feed_likes_user
 from app.dao.report import *
-from app.dao.feed import *
 from app.dao.user import get_user_daily_nutrient
 from app.service.feed import FeedService
 from app.service.user import UserService
-import datetime
 
 
 class ReportService:
@@ -84,9 +85,9 @@ class ReportService:
 
         # start_of_week =
 
-        d = "2023-W"+str(search_week)
-        start_of_week = datetime.datetime.strptime(d + '-1', "%Y-W%W-%w")
-        end_of_week = datetime.datetime.strptime(d+'-0', "%Y-W%W-%w")
+        d = "2023-W" + str(search_week)
+        start_of_week = datetime.datetime.strptime(d + "-1", "%Y-W%W-%w")
+        end_of_week = datetime.datetime.strptime(d + "-0", "%Y-W%W-%w")
 
         return {
             "goal": user_goal,
@@ -94,8 +95,8 @@ class ReportService:
             "weekly_nutrient": weekly_nutrient,
             "daily_goal": user_daily_goal_round,
             "daily_nutrient": nutrient,
-            "start_of_week":str(start_of_week).split(" ")[0],
-            "end_of_week":str(end_of_week).split(" ")[0]
+            "start_of_week": str(start_of_week).split(" ")[0],
+            "end_of_week": str(end_of_week).split(" ")[0],
         }
 
     async def service_get_report_history(self, week: int, user_id: int):
