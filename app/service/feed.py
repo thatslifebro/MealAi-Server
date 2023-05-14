@@ -1,13 +1,13 @@
-import datetime
-from fastapi import File, UploadFile
+from datetime import datetime
+
+from fastapi import File
+
 from app.dao.feed import *
 from app.dao.like import get_feed_likes_user, delete_likes
 from app.dao.user import read_by_user_id, get_user_daily_nutrient
-from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
-
-from app.error.feed import *
 from app.database.database import SessionLocal
-
+from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
+from app.error.feed import *
 from app.utils.predict import *
 
 
@@ -140,7 +140,7 @@ class FeedService:
 
         # contents = await file.read()
         image_data = await predict_image(file)
-        image_url = image_data["origin"]["image_key"]+".png"
+        image_url = image_data["origin"]["image_key"] + ".png"
 
         user = await read_by_user_id(user_id)
         post_feed_data = {
@@ -223,7 +223,6 @@ class FeedService:
         }
         foods_data = req.foods
 
-
         session = SessionLocal()
         try:
             patch_feed(session, patch_feed_data)
@@ -235,9 +234,7 @@ class FeedService:
             session.rollback()
             raise UpdateFeedException
 
-        return await self.service_get_feed_by_id(feed_id,user_id)
+        return await self.service_get_feed_by_id(feed_id, user_id)
 
     def service_search_food_by_name(self, food_name: str):
         return search_food_by_name(food_name)
-
-
