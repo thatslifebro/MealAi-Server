@@ -14,10 +14,10 @@ client_s3 = boto3.client(
 )
 
 
-def upload_file(file, user_id):
+def upload_file(file):
     try:
         name = (
-            + str(uuid4())
+            str(uuid4())
             + "-"
             + file.filename
         )
