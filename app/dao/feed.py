@@ -170,20 +170,21 @@ def search_food_by_name(name: str):
         result = conn.execute(statement, data)
         return result.mappings().all()
 
-def get_food_by_id(session,food_id: int):
-    data = {"food_id": food_id}
-    statement = text(
-        """SELECT * FROM FoodInfo WHERE food_id = :food_id """
-    )
-    result = session.execute(statement, data)
-    food = result.mappings().first()
-    food_info = {
-        "food_id": food.food_id,
-        "name": food.name,
-        "weight": food.weight,
-        "kcal": round( food.kcal),
-        "carbohydrate": round(food.carbohydrate),
-        "protein": round(food.protein),
-        "fat": round(food.fat)
-    }
-    return food_info
+def get_food_by_id(food_id: int):
+    with engine.connect() as conn:
+        data = {"food_id": food_id}
+        statement = text(
+            """SELECT * FROM FoodInfo WHERE food_id = :food_id """
+        )
+        result = conn.execute(statement, data)
+        food = result.mappings().first()
+        food_info = {
+            "food_id": food.food_id,
+            "name": food.name,
+            "weight": food.weight,
+            "kcal": round( food.kcal),
+            "carbohydrate": round(food.carbohydrate),
+            "protein": round(food.protein),
+            "fat": round(food.fat)
+        }
+        return food_info

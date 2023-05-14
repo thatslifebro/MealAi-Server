@@ -50,3 +50,9 @@ class FoodInfo(BaseModel):
     carbohydrate: float = Field(..., title="탄수화물")
     protein: float = Field(..., title="단백질")
     fat: float = Field(..., title="지방")
+
+class NutrientInfo(BaseModel):
+    kcal: float = Field(..., title="kcal")
+    carbohydrate: float = Field(..., title="탄수화물")
+    protein: float = Field(..., title="단백질")
+    fat: float = Field(..., title="지방")
