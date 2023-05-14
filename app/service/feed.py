@@ -140,7 +140,7 @@ class FeedService:
 
         # contents = await file.read()
         image_data = await predict_image(file)
-        image_url = image_data["origin"]["image_key"]
+        image_url = image_data["origin"]["image_key"]+".png"
 
         user = await read_by_user_id(user_id)
         post_feed_data = {
@@ -166,28 +166,26 @@ class FeedService:
 
             for crop in image_data["crops"]:
                 food_data = get_food_info_by_id(crop["food_id"])
-
+                crop_url = crop["image_key"] + ".png"
                 foods_data.append(
                     {
                         "food_id": food_data.food_id,
-                        "image_url": crop["image_key"],
+                        "image_url": crop_url,
                         "weight": food_data.weight,
                         "is_deleted": 0,
                         "feed_id": feed_id,
                     }
                 )
-            array = []
 
             for food in foods_data:
                 insert_feed_food(session, feed_id, food)
-                array.append(get_food_by_id(session, food["food_id"]))
 
             session.commit()
         except SQLAlchemyError:
             session.rollback()
             raise UpdateFeedException
 
-        return array
+        return feed_id
 
     def service_delete_feed(self, feed_id: int, user_id):
         feed_data = get_feed_by_id(feed_id)
