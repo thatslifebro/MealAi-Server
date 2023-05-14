@@ -12,6 +12,8 @@ class ReportService:
 
     async def service_get_report_week(self, week: int, user_id: int):
         latest_week = get_feeds_of_latest_week(user_id)
+        if latest_week is None:
+            return None
         search_week = latest_week
         for i in range(week - 1):
             search_week = get_previous_week(user_id, search_week)
