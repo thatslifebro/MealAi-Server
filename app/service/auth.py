@@ -1,19 +1,21 @@
-from app.error.user import *
-import bcrypt, jwt
+import random
+import smtplib
+import ssl
+from datetime import datetime, timedelta
+from email.message import EmailMessage
+
+import bcrypt
+import jwt
+from jwt.exceptions import *
+from starlette.config import Config
+
+from app.dao.auth import *
 from app.dao.user import *
 from app.dto.auth.AuthRequest import *
 from app.dto.auth.AuthResponse import *
-from starlette.config import Config
-from datetime import datetime, timedelta
-import time
-import smtplib, ssl
-import random
-from email.message import EmailMessage
-from app.utils.hash_password import hash_password
-from app.dao.auth import *
-from jwt.exceptions import *
 from app.error.auth import *
-
+from app.error.user import *
+from app.utils.hash_password import hash_password
 
 config = Config(".env")
 
@@ -138,7 +140,7 @@ class AuthService:
             user_id = payload.get("user_id")
             db_refresh_token = await read_refresh_token_by_user_id(user_id=user_id)
             if refresh_token != db_refresh_token.refresh_token:
-                raise NotFoundUserException
+                raise NotMatchRefreshTokenException
 
             access_token = self.create_access_token(user_id=user_id)
             refresh_token = self.create_refresh_token(user_id=user_id)
