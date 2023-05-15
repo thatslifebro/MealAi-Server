@@ -1,9 +1,6 @@
 from app.error.base import CustomException
 
 
-from app.error.base import CustomException
-
-
 class NoFeedIdException(CustomException):
     status = 404
     error_code = 3001
@@ -26,7 +23,7 @@ class UpdateFeedException(CustomException):
 
 
 class UnauthorizedFeedException(CustomException):
-    status = 401
+    status = 403
     error_code = 3004
     error_name = "UnauthorizedFeedError"
     message = "해당 피드의 권한이 없습니다."

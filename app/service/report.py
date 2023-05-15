@@ -112,6 +112,8 @@ class ReportService:
 
         array = [[] for i in range(7)]
 
+        d = "2023-W" + str(search_week)
+
         for feed in feeds:
             likes = get_feed_likes(feed.feed_id)
 
@@ -138,6 +140,36 @@ class ReportService:
             array[feed.date.weekday()].append(res)
 
             # array.append(res)
+        for i in range(7):
+            if not array[i]:
+                if i == 6:
+                    array[i].append(
+                        {
+                            "date": str(
+                                datetime.datetime.strptime(
+                                    d + "-" + str(i - 6), "%Y-W%W-%w"
+                                )
+                            ).split(" ")[0],
+                            "kcal": 0,
+                            "carbohydrate": 0,
+                            "protein": 0,
+                            "fat": 0,
+                        }
+                    )
+                else:
+                    array[i].append(
+                        {
+                            "date": str(
+                                datetime.datetime.strptime(
+                                    d + "-" + str(i + 1), "%Y-W%W-%w"
+                                )
+                            ).split(" ")[0],
+                            "kcal": 0,
+                            "carbohydrate": 0,
+                            "protein": 0,
+                            "fat": 0,
+                        }
+                    )
 
         nutrient = []
         for i in range(7):
