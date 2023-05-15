@@ -12,10 +12,11 @@ from app.utils.upload_image import *
 async def predict_image(file: UploadFile):
     contents = await file.read()
     img = Image.open(io.BytesIO(contents)).convert("RGB")
-    img.resize((512, 512))
 
     model = YOLO("last.pt")
-    results = model.predict(conf=0.01, source=img)
+    results = model.predict(
+        conf=0.015, imgsz=img.size, source=img, max_det=10, iou=0.1, agnostic_nms=True
+    )
     boxes = results[0].boxes
 
     food_classes = np.array(boxes.cls, dtype="int")
@@ -28,7 +29,6 @@ async def predict_image(file: UploadFile):
             image.save(output, format="PNG")
             output.seek(0)
             fl = UploadFile(file=output, filename=f"{image_key}.png")
-            print(image_key)
             upload_file(fl)
 
     image_key = str(uuid4())
