@@ -192,10 +192,11 @@ class FeedService:
             session.close()
             raise Test3Exception
         try:
-            for food in foods_data:
-                insert_feed_food(session, feed_id, food)
-                session.commit()
-                session.close()
+            return foods_data
+            # for food in foods_data:
+            #     insert_feed_food(session, feed_id, food)
+            #     session.commit()
+            #     session.close()
         except SQLAlchemyError:
             session.rollback()
             session.close()
