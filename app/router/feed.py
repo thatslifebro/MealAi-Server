@@ -13,7 +13,7 @@ router = APIRouter(
 @router.post(
     "",
     description="피드 작성",
-    response_model=int,
+    # response_model=int,
     tags=["feed"],
 )
 async def post_feed(
