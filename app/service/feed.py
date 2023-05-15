@@ -162,7 +162,17 @@ class FeedService:
         session = SessionLocal()
         try:
             post_feed(session, post_feed_data)
+        except SQLAlchemyError:
+            session.rollback()
+            session.close()
+            raise Test1Exception
+        try:
             feed_id = get_recent_post_id(session)
+        except SQLAlchemyError:
+            session.rollback()
+            session.close()
+            raise Test2Exception
+        try:
             foods_data = []
 
             for crop in image_data["crops"]:
@@ -177,16 +187,19 @@ class FeedService:
                         "feed_id": feed_id,
                     }
                 )
-
-            for food in foods_data:
-                insert_feed_food(session, feed_id, food)
-
-            session.commit()
-            session.close()
         except SQLAlchemyError:
             session.rollback()
             session.close()
-            raise UpdateFeedException
+            raise Test3Exception
+        try:
+            for food in foods_data:
+                insert_feed_food(session, feed_id, food)
+                session.commit()
+                session.close()
+        except SQLAlchemyError:
+            session.rollback()
+            session.close()
+            raise Test4Exception
 
         return feed_id
 
