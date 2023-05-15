@@ -86,7 +86,6 @@ class FeedService:
 
         return res
 
-
     async def service_get_feed_by_id(self, feed_id: int, user_id: int):
         feed_data = get_feed_by_id(feed_id)
         if feed_data is None:
@@ -123,7 +122,7 @@ class FeedService:
         array = []
 
         for feed in feeds:
-            if not feed.open and feed.user_id != user_id:
+            if not feed.open:
                 continue
 
             res = await self.form_feed_res(feed, user_id)
@@ -132,8 +131,6 @@ class FeedService:
             array.append(res)
 
         return {"prev_page": prev_page, "next_page": next_page, "feeds": array}
-
-
 
     async def service_post_feed(
         self, req: PostFeed, user_id: int, file: UploadFile = File(...)
@@ -144,7 +141,6 @@ class FeedService:
         # contents = await file.read()
         image_data = await predict_image(file)
         image_url = image_data["origin"]["image_key"] + ".png"
-
 
         user = await read_by_user_id(user_id)
 
@@ -165,7 +161,6 @@ class FeedService:
         # 분석한 이미지를 여기에 저장해야함
         session = SessionLocal()
         try:
-
             post_feed(session, post_feed_data)
             feed_id = get_recent_post_id(session)
             foods_data = []
