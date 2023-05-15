@@ -84,7 +84,7 @@ async def get_feed_by_id(
     tags=["feed"],
 )
 async def patch_feed_by_id(
-    feed_id: int, req: PatchFeedData, user_id: int = Depends(current_user_id)
+    feed_id: int, req: PatchFeedData, user_id: int = Depends(current_user_id_for_feed)
 ) -> FeedData:
     return await FeedService().service_patch_feed(feed_id, req, user_id)
 
