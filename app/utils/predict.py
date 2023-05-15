@@ -39,7 +39,10 @@ async def predict_image(file: UploadFile):
         crop = img.crop(crop_size)
         image_key = str(uuid4())
         image_up(crop, str(food_id + 1) + "/" + image_key)
-        detected = {"food_id": int(food_id + 1), "image_key": image_key}
+        detected = {
+            "food_id": int(food_id + 1),
+            "image_key": str(food_id + 1) + "/" + image_key,
+        }
 
         crops.append(detected)
 
