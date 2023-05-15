@@ -56,11 +56,11 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
             data = {"skip": skip, "limit": limit}
             if filter == "popularity":
                 statement = text(
-                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id ORDER BY L.cou DESC, created_at DESC, feed_id DESC LIMIT :skip, :limit"""
+                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id WHERE F.user_id!=-1 ORDER BY L.cou DESC, created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
-                    """SELECT * FROM Feed ORDER BY created_at DESC, feed_id DESC LIMIT :skip, :limit"""
+                    """SELECT * FROM Feed WHERE Feed.user_id!=-1 ORDER BY created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
 
         else:
@@ -72,11 +72,11 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
             }
             if filter == "popularity":
                 statement = text(
-                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id LEFT JOIN User ON F.user_id=User.user_id WHERE User.goal=:goal ORDER BY L.cou DESC, F.created_at DESC , F.feed_id DESC LIMIT :skip, :limit"""
+                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id LEFT JOIN User ON F.user_id=User.user_id WHERE User.goal=:goal AND F.user_id!=-1 ORDER BY L.cou DESC, F.created_at DESC , F.feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
-                    """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal ORDER BY :filter_data DESC, feed_id DESC LIMIT :skip, :limit"""
+                    """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal AND Feed.user_id!=-1 ORDER BY :filter_data DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
 
         feeds_num = get_feeds_num_by_goal(goal)
@@ -99,6 +99,7 @@ def get_recent_post_id(session):
     result = session.execute(statement)
     feed_id = result.mappings().first()["LAST_INSERT_ID()"]
     return feed_id
+
 
 
 def insert_feed_food(session, feed_id, food_data):

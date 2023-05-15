@@ -64,3 +64,4 @@ class FeedFood(Base):
 
     food = relationship("FoodInfo")
     feed = relationship("Feed", cascade="delete")
+

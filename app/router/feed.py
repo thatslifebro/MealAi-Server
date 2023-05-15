@@ -21,7 +21,7 @@ async def post_feed(
     meal_time: MealTimeEnum = Form(),
     date: str = Form(),
     file: UploadFile = File(),
-    user_id: int = Depends(current_user_id),
+    user_id: int = Depends(current_user_id_for_feed),
 ):
     req = {"meal_time": meal_time, "date": date}
     return await FeedService().service_post_feed(req, user_id, file)
