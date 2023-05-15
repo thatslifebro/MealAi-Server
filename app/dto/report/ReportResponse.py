@@ -39,10 +39,20 @@ class ReportGoal(BaseModel):
         orm_mode = True
 
 
+class ReportDataSmall(BaseModel):
+    date: datetime.date = Field(..., title="식사 날짜")
+    kcal: float = Field(..., title="전체 열량")
+    carbohydrate: float = Field(..., title="전체 탄수화물")
+    protein: float = Field(..., title="전체 단백질")
+    fat: float = Field(..., title="전체 지방")
+
+
 class ReportHistoryResponse(BaseModel):
     goal: ReportGoal = Field(..., title="유저의 하루 목표치")
     nutrient: List[ReportGoal] = Field(..., title="유저의 요일별 총 영양소")
-    data: List[List[ReportData]] = Field(..., title="월화수목금토일 유저의 데이터")
+    data: List[List[Union[ReportData, ReportDataSmall]]] = Field(
+        ..., title="월화수목금토일 유저의 데이터"
+    )
 
 
 class ReportResponse(BaseModel):
