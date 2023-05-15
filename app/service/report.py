@@ -84,9 +84,9 @@ class ReportService:
 
         # start_of_week =
 
-        d = "2023-W"+str(search_week)
-        start_of_week = datetime.datetime.strptime(d + '-1', "%Y-W%W-%w")
-        end_of_week = datetime.datetime.strptime(d+'-0', "%Y-W%W-%w")
+        d = "2023-W" + str(search_week)
+        start_of_week = datetime.datetime.strptime(d + "-1", "%Y-W%W-%w")
+        end_of_week = datetime.datetime.strptime(d + "-0", "%Y-W%W-%w")
 
         return {
             "goal": user_goal,
@@ -94,8 +94,8 @@ class ReportService:
             "weekly_nutrient": weekly_nutrient,
             "daily_goal": user_daily_goal_round,
             "daily_nutrient": nutrient,
-            "start_of_week":str(start_of_week).split(" ")[0],
-            "end_of_week":str(end_of_week).split(" ")[0]
+            "start_of_week": str(start_of_week).split(" ")[0],
+            "end_of_week": str(end_of_week).split(" ")[0],
         }
 
     async def service_get_report_history(self, week: int, user_id: int):
@@ -110,6 +110,8 @@ class ReportService:
         feeds = get_feeds_by_week(user_id, search_week)
 
         array = [[] for i in range(7)]
+
+        d = "2023-W" + str(search_week)
 
         for feed in feeds:
             likes = get_feed_likes(feed.feed_id)
@@ -137,6 +139,36 @@ class ReportService:
             array[feed.date.weekday()].append(res)
 
             # array.append(res)
+        for i in range(7):
+            if not array[i]:
+                if i == 6:
+                    array[i].append(
+                        {
+                            "date": str(
+                                datetime.datetime.strptime(
+                                    d + "-" + str(i - 6), "%Y-W%W-%w"
+                                )
+                            ).split(" ")[0],
+                            "kcal": 0,
+                            "carbohydrate": 0,
+                            "protein": 0,
+                            "fat": 0,
+                        }
+                    )
+                else:
+                    array[i].append(
+                        {
+                            "date": str(
+                                datetime.datetime.strptime(
+                                    d + "-" + str(i + 1), "%Y-W%W-%w"
+                                )
+                            ).split(" ")[0],
+                            "kcal": 0,
+                            "carbohydrate": 0,
+                            "protein": 0,
+                            "fat": 0,
+                        }
+                    )
 
         nutrient = []
         for i in range(7):

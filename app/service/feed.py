@@ -182,8 +182,10 @@ class FeedService:
                 insert_feed_food(session, feed_id, food)
 
             session.commit()
+            session.close()
         except SQLAlchemyError:
             session.rollback()
+            session.close()
             raise UpdateFeedException
 
         return feed_id
@@ -205,8 +207,10 @@ class FeedService:
             delete_likes(session, feed_id)
             delete_feed(session, feed_id)
             session.commit()
+            session.close()
         except SQLAlchemyError:
             session.rollback()
+            session.close()
             raise DeleteFeedException
 
         return data
@@ -231,8 +235,10 @@ class FeedService:
             for food_data in foods_data:
                 insert_feed_food_patch(session, feed_id, food_data)
             session.commit()
+            session.close()
         except SQLAlchemyError:
             session.rollback()
+            session.close()
             raise UpdateFeedException
 
         return await self.service_get_feed_by_id(feed_id, user_id)
