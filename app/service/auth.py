@@ -90,7 +90,7 @@ class AuthService:
         msg["From"] = SENDER_EMAIL
         msg["To"] = receiver_email
 
-        auth_num = str(random.randint(100000, 999999))
+        auth_num = self.make_randint_string(6)
 
         msg.set_content(f"회원가입을 위한 이메일 인증번호는 {auth_num}입니다.")
 
@@ -110,8 +110,9 @@ class AuthService:
         if user.is_deleted:
             raise DeletedEmailException
 
-        auth_num = str(random.randint(100000, 999999))
+        auth_num = self.make_randint_string(8)
         changed_password = hash_password(auth_num)
+
         await update_password(password=changed_password, user_id=user.user_id)
 
         msg = EmailMessage()
@@ -155,3 +156,6 @@ class AuthService:
             raise ExpiredAccessTokenException
         except (InvalidSignatureError, DecodeError):
             raise InvalidTokenException
+
+    def make_randint_string(self, length: int):
+        return str(random.randint(10 ** (length - 1), 10**length - 1))

@@ -1,10 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter
+
 from app.dto.feed.FeedRequest import *
 from app.dto.feed.FeedResponse import *
-from app.service.feed import *
 from app.service.like import *
 from app.utils.depends import *
-from typing import Union
 
 router = APIRouter(
     prefix="/api/feeds",
@@ -105,8 +104,11 @@ def delete_feed_by_id(feed_id: int, user_id: int = Depends(current_user_id)):
     response_model=List[FoodInfo],
     tags=["feed"],
 )
-def search_food_by_name(food_name: str,):
+def search_food_by_name(
+    food_name: str,
+):
     return FeedService().service_search_food_by_name(food_name)
+
 
 @router.post(
     "/food",
