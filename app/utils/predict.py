@@ -2,7 +2,7 @@ import io
 from uuid import uuid4
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from fastapi import UploadFile
 from ultralytics import YOLO
 
@@ -65,4 +65,5 @@ def resize_image(image):
         new_width = int((new_height / height) * width)
 
     resized_image = image.resize((new_width, new_height))
-    return resized_image
+
+    return ImageOps.exif_transpose(resized_image)
