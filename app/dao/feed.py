@@ -61,11 +61,11 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
                     """SELECT F.* FROM Feed AS F 
                     LEFT JOIN (SELECT COUNT(*) as cou,feed_id 
                     FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id 
-                    WHERE F.user_id!=-1 ORDER BY L.cou DESC, created_at DESC, feed_id DESC LIMIT :skip, :limit"""
+                    WHERE F.user_id!=-1 AND open=1 ORDER BY L.cou DESC, created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
-                    """SELECT * FROM Feed WHERE Feed.user_id!=-1 
+                    """SELECT * FROM Feed WHERE Feed.user_id!=-1 AND open=1 
                     ORDER BY created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
 
@@ -81,13 +81,13 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
                     """SELECT F.* FROM Feed AS F 
                     LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id 
                     LEFT JOIN User ON F.user_id=User.user_id 
-                    WHERE User.goal=:goal AND F.user_id!=-1 
+                    WHERE User.goal=:goal AND F.user_id!=-1 AND open=1 
                     ORDER BY L.cou DESC, F.created_at DESC , F.feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
                     """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id 
-                    WHERE User.goal=:goal AND Feed.user_id!=-1 
+                    WHERE User.goal=:goal AND Feed.user_id!=-1 AND open=1 
                     ORDER BY :filter_data DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
 
