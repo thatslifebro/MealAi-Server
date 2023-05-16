@@ -12,6 +12,7 @@ from app.utils.upload_image import *
 async def predict_image(file: UploadFile):
     contents = await file.read()
     img = Image.open(io.BytesIO(contents)).convert("RGB")
+    img = resize_image(img)
 
     model = YOLO("last.pt")
     results = model.predict(
@@ -49,3 +50,19 @@ def image_up(image: Image, image_key: str):
         output.seek(0)
         fl = UploadFile(file=output, filename=f"{image_key}.png")
         upload_file(fl)
+
+
+def resize_image(image):
+    width, height = image.size
+    if width <= 1024 and height <= 1024:
+        return image
+
+    if width > height:
+        new_width = 1024
+        new_height = int((new_width / width) * height)
+    else:
+        new_height = 1024
+        new_width = int((new_height / height) * width)
+
+    resized_image = image.resize((new_width, new_height))
+    return resized_image
