@@ -191,5 +191,11 @@ class ReportService:
             )
 
         user_daily_goal = await get_user_daily_nutrient(user_id)
+        user_daily_goal_round = {
+            "kcal": round(user_daily_goal["kcal"]),
+            "carbohydrate": round(user_daily_goal["carbohydrate"]),
+            "protein": round(user_daily_goal["protein"]),
+            "fat": round(user_daily_goal["fat"]),
+        }
 
-        return {"goal": user_daily_goal, "nutrient": nutrient, "data": array}
+        return {"goal": user_daily_goal_round, "nutrient": nutrient, "data": array}
