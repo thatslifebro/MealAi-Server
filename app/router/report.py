@@ -12,7 +12,7 @@ router = APIRouter(
 @router.get(
     "/history/{week}",
     description="주간 통계",
-    response_model=Union[ReportResponse, None],
+    response_model=Union[ReportHistoryResponse, None],
     tags=["report"],
 )
 async def get_report_week(week: int, user_id: int = Depends(current_user_id)):
