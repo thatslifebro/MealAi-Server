@@ -122,9 +122,6 @@ class FeedService:
         array = []
 
         for feed in feeds:
-            if not feed.open:
-                continue
-
             res = await self.form_feed_res(feed, user_id)
             res.update({"user_daily_nutrient": None})
 
