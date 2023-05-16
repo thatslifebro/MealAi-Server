@@ -16,6 +16,16 @@ class FeedService:
         pass
 
     def service_get_food_info_by_data(self, feed_food_data):
+        if not feed_food_data:
+            return (
+                [],
+                {
+                    "kcal": 0,
+                    "carbohydrate": 0,
+                    "protein": 0,
+                    "fat": 0,
+                },
+            )
         kcal = 0
         carbohydrate = 0
         protein = 0
