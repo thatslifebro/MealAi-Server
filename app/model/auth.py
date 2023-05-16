@@ -2,9 +2,8 @@ from sqlalchemy import (
     Integer,
     Column,
     String,
-    DATETIME,
-    Enum,
 )
+
 from app.database.database import Base
 
 
