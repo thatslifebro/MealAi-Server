@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.config import Config
 
 from app.database.database import engine
 from app.database.token import Redis
@@ -16,21 +17,15 @@ model_user.Base.metadata.create_all(bind=engine)
 model_like.Base.metadata.create_all(bind=engine)
 model_auth.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
-
-
-origins = [
-    "http://localhost:3000",
-    "https://meal-ai-client-git-dev-client-meal-ai.vercel.app",
-    "https://meal-ai-client.vercel.app",
-    "http://kdt-ai6-team08.elicecoding.com",
-]
+config = Config(".env")
+ORIGINS = config("ORIGINS").split(",")
 
 redis = Redis()
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
