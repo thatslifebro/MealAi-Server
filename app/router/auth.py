@@ -15,11 +15,7 @@ async def login(
 ):
     res = await AuthService().login(login_info=request, redis=redis)
     response.set_cookie(
-        key="refresh_token",
-        value=res["refresh_token"],
-        httponly=False,
-        secure=False,
-        samesite="none",
+        key="refresh_token", value=res["refresh_token"], httponly=True, path="/"
     )
     return LoginResponse(access_token=res["access_token"])
 
