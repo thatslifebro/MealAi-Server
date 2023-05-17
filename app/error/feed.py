@@ -55,3 +55,10 @@ class Test4Exception(CustomException):
     error_code = 3013
     error_name = "UnauthorizedFeedError"
     message = "해당 피드의 권한이 없습니다."
+
+
+class FailedPredictionException(CustomException):
+    status = 400
+    error_code = 3014
+    error_name = "FAILED_PREDICTION"
+    message = "이미지 분석에 실패했습니다."
