@@ -22,10 +22,13 @@ async def login(
 
 @router.post("/logout", description="로그아웃", response_model=str, tags=["auth"])
 async def logout(
+    response: Response,
+    refresh_token: str = Cookie(None),
     request: LogoutRequest = Depends(current_user_token),
     redis: Redis = Depends(get_redis),
 ):
-    await AuthService().logout(user=request, redis=redis)
+    response.delete_cookie(key="refresh_token", httponly=True, path="/")
+    await AuthService().logout(user=request, refresh_token=refresh_token, redis=redis)
     return "로그아웃 완료"
 
 

@@ -50,9 +50,10 @@ class AuthService:
         res = dict({"access_token": access_token, "refresh_token": refresh_token})
         return res
 
-    async def logout(self, user: LogoutRequest, redis):
+    async def logout(self, user: LogoutRequest, refresh_token: str, redis):
         await delete_refresh_token(user_id=user.user_id)
         redis.sadd("blacklist", user.access_token)
+        redis.sadd("blacklist", refresh_token)
         return None
 
     async def send_mail_for_register(self, receiver_email: str):
