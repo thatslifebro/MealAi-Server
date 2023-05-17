@@ -6,6 +6,7 @@ from PIL import Image, ImageOps
 from fastapi import UploadFile
 from ultralytics import YOLO
 
+from app.error.feed import FailedPredictionException
 from app.utils.upload_image import *
 
 
@@ -28,6 +29,9 @@ async def predict_image(file: UploadFile):
 
     food_classes = np.array(boxes.cls, dtype="int")
     food_xyxy = np.array(boxes.xyxy, dtype="int")
+
+    if len(food_classes) == 0:
+        raise FailedPredictionException
 
     crops = []
 
