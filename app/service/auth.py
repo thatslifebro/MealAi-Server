@@ -22,6 +22,7 @@ ACCESS_TOKEN_SECRET = config("ACCESS_TOKEN_SECRET")
 REFRESH_TOKEN_SECRET = config("REFRESH_TOKEN_SECRET")
 ACCESS_TOKEN_EXPIRES_MINUTES = int(config("ACCESS_TOKEN_EXPIRES_MINUTES"))
 REFRESH_TOKEN_EXPIRES_DAY = int(config("REFRESH_TOKEN_EXPIRES_DAY"))
+REFRESH_TOKEN_EXPIRES_DAY_REDIS = int(config("REFRESH_TOKEN_EXPIRES_DAY_REDIS"))
 ALGORITHM = config("ALGORITHM")
 
 
@@ -29,7 +30,7 @@ class AuthService:
     def __init__(self):
         pass
 
-    async def login(self, login_info: LoginRequest):
+    async def login(self, login_info: LoginRequest, redis):
         email, password = login_info.email, login_info.password
         user = await read_by_email(email=email)
         check_user(user)
@@ -40,11 +41,14 @@ class AuthService:
         access_token = create_access_token(user.user_id)
         refresh_token = create_refresh_token(user.user_id)
 
-        await upsert_refresh_token(user.user_id, refresh_token)
-        return LoginResponse(
-            access_token=access_token,
-            refresh_token=refresh_token,
+        redis.set(
+            name=str(user.user_id),
+            value=refresh_token,
+            ex=REFRESH_TOKEN_EXPIRES_DAY_REDIS,
         )
+
+        res = dict({"access_token": access_token, "refresh_token": refresh_token})
+        return res
 
     async def logout(self, user: LogoutRequest, redis):
         await delete_refresh_token(user_id=user.user_id)
@@ -77,26 +81,21 @@ class AuthService:
 
         return None
 
-    async def refresh(self, refresh_token: RefreshRequest):
-        refresh_token = refresh_token.refresh_token
+    async def refresh(self, refresh_token: str, redis):
         try:
             payload = jwt.decode(
                 jwt=refresh_token, key=REFRESH_TOKEN_SECRET, algorithms=ALGORITHM
             )
             user_id = payload.get("user_id")
-            db_refresh_token = await read_refresh_token_by_user_id(user_id=user_id)
-            if refresh_token != db_refresh_token.refresh_token:
+
+            db_refresh_token = redis.get(str(user_id)).decode()
+
+            if refresh_token != db_refresh_token:
                 raise NotMatchRefreshTokenException
 
             access_token = create_access_token(user_id=user_id)
-            refresh_token = create_refresh_token(user_id=user_id)
 
-            await upsert_refresh_token(user_id, refresh_token=refresh_token)
-
-            return RefreshResponse(
-                access_token=access_token,
-                refresh_token=refresh_token,
-            )
+            return RefreshResponse(access_token=access_token)
         except ExpiredSignatureError:
             raise ExpiredAccessTokenException
         except (InvalidSignatureError, DecodeError):

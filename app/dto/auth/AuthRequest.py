@@ -10,10 +10,6 @@ class EmailRequest(BaseModel):
     email: EmailStr = Field(..., title="사용자 Email")
 
 
-class RefreshRequest(BaseModel):
-    refresh_token: str = Field(..., title="refresh Token")
-
-
 class LogoutRequest(BaseModel):
     user_id: int = Field(..., title="user_id")
     access_token: str = Field(..., title="refresh Token")
