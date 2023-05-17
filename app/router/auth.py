@@ -18,6 +18,8 @@ async def login(
         key="refresh_token",
         value=res["refresh_token"],
         httponly=False,
+        secure=False,
+        samesite="none",
     )
     return LoginResponse(access_token=res["access_token"])
 
