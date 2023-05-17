@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Response, Cookie
 
-from app.database.token import get_redis, Redis
 from app.dto.auth.AuthResponse import *
 from app.service.auth import AuthService
 from app.utils.depends import *
@@ -15,7 +14,12 @@ async def login(
     request: LoginRequest, response: Response, redis: Redis = Depends(get_redis)
 ):
     res = await AuthService().login(login_info=request, redis=redis)
-    response.set_cookie(key="refresh_token", value=res["refresh_token"], httponly=True)
+    response.set_cookie(
+        key="refresh_token",
+        value=res["refresh_token"],
+        httponly=True,
+        samesite="strict",
+    )
     return LoginResponse(access_token=res["access_token"])
 
 
