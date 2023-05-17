@@ -18,7 +18,8 @@ async def login(
         key="refresh_token",
         value=res["refresh_token"],
         httponly=False,
-        domain="kdt-ai6-team08.elicecoding.com",
+        secure=False,
+        samesite="none",
     )
     return LoginResponse(access_token=res["access_token"])
 
