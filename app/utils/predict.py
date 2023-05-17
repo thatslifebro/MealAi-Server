@@ -16,7 +16,13 @@ async def predict_image(file: UploadFile):
 
     model = YOLO("last.pt")
     results = model.predict(
-        conf=0.015, imgsz=img.size, source=img, max_det=10, iou=0.1, agnostic_nms=True
+        conf=0.15,
+        imgsz=img.size,
+        source=img,
+        max_det=10,
+        iou=0.4,
+        agnostic_nms=True,
+        augment=True,
     )
     boxes = results[0].boxes
 

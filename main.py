@@ -6,7 +6,6 @@ from starlette.config import Config
 from app.database.database import engine
 from app.database.token import Redis
 from app.error.base import CustomException
-from app.model import auth as model_auth
 from app.model import feed as model_feed
 from app.model import like as model_like
 from app.model import user as model_user
@@ -15,7 +14,6 @@ from app.router import user, feed, auth, report
 model_feed.Base.metadata.create_all(bind=engine)
 model_user.Base.metadata.create_all(bind=engine)
 model_like.Base.metadata.create_all(bind=engine)
-model_auth.Base.metadata.create_all(bind=engine)
 
 config = Config(".env")
 ORIGINS = config("ORIGINS").split(",")
