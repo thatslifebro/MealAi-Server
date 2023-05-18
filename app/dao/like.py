@@ -1,9 +1,5 @@
-from sqlalchemy.exc import SQLAlchemyError
-
 from app.database.database import engine
 from sqlalchemy.sql import text
-
-from app.error.feed import NoFeedIdException
 
 
 def get_feed_likes(feed_id: int):

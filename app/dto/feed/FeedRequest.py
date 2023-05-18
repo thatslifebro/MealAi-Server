@@ -3,7 +3,6 @@ import decimal
 from pydantic import BaseModel, Field
 from typing import List, Union
 from enum import Enum
-from fastapi import Depends, Form
 
 
 class GoalEnum(str, Enum):
@@ -31,6 +30,7 @@ class Food(BaseModel):
     food_name: str = Field(..., title="음식 이름")
     image_url: Union[str, None] = Field(..., title="음식 별 사진 URL")
     weight: float = Field(..., title="음식의 양")
+
 
 class FoodRequest(BaseModel):
     food_id: int = Field(..., title="음식 id")

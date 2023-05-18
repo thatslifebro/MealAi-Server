@@ -1,6 +1,3 @@
-from sqlalchemy.exc import SQLAlchemyError
-
-from app.dao.like import get_feed_likes
 from app.database.database import engine
 from sqlalchemy.sql import text
 
@@ -59,8 +56,7 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
             if filter == "popularity":
                 statement = text(
                     """SELECT F.* FROM Feed AS F 
-                    LEFT JOIN (SELECT COUNT(*) as cou,feed_id 
-                    FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id 
+                    LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id 
                     WHERE F.user_id!=-1 AND open=1 ORDER BY L.cou DESC, created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
