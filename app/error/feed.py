@@ -29,32 +29,11 @@ class UnauthorizedFeedException(CustomException):
     message = "해당 피드의 권한이 없습니다."
 
 
-class Test1Exception(CustomException):
-    status = 403
-    error_code = 3010
-    error_name = "UnauthorizedFeedError"
-    message = "해당 피드의 권한이 없습니다."
-
-
-class Test2Exception(CustomException):
-    status = 403
-    error_code = 3011
-    error_name = "UnauthorizedFeedError"
-    message = "해당 피드의 권한이 없습니다."
-
-
-class Test3Exception(CustomException):
-    status = 403
-    error_code = 3012
-    error_name = "UnauthorizedFeedError"
-    message = "해당 피드의 권한이 없습니다."
-
-
-class Test4Exception(CustomException):
-    status = 403
-    error_code = 3013
-    error_name = "UnauthorizedFeedError"
-    message = "해당 피드의 권한이 없습니다."
+class PostException(CustomException):
+    status = 500
+    error_code = 3005
+    error_name = "FeedPostServerError"
+    message = "서버 내부 에러 입니다."
 
 
 class FailedPredictionException(CustomException):

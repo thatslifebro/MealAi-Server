@@ -1,7 +1,7 @@
 import datetime
 
 from app.dao.feed import *
-from app.dao.like import get_feed_likes_user
+from app.dao.like import get_feed_likes_user, get_feed_likes
 from app.dao.report import *
 from app.dao.user import get_user_daily_nutrient
 from app.service.feed import FeedService
