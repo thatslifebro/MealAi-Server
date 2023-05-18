@@ -2,7 +2,7 @@ import datetime
 
 from pydantic import BaseModel, Field
 from typing import List, Union
-from app.dto.feed.FeedRequest import Food, MealTimeEnum, GoalEnum
+from app.dto.feed.FeedRequest import MealTimeEnum, GoalEnum
 
 
 class ReportData(BaseModel):

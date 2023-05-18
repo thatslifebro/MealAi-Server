@@ -1,4 +1,3 @@
-from app.dao.feed import get_feed_food_by_id, get_food_info_by_id
 from app.dao.like import *
 from app.service.feed import *
 

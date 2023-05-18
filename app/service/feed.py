@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from fastapi import File
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.dao.feed import *
-from app.dao.like import get_feed_likes_user, delete_likes
+from app.dao.like import get_feed_likes_user, delete_likes, get_feed_likes
 from app.dao.user import read_by_user_id, get_user_daily_nutrient
 from app.database.database import SessionLocal
 from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
@@ -197,7 +198,7 @@ class FeedService:
         except SQLAlchemyError:
             session.rollback()
             session.close()
-            raise Test4Exception
+            raise PostException
 
         return feed_id
 
@@ -209,7 +210,6 @@ class FeedService:
             raise UnauthorizedFeedException
 
         feed_foods = get_feed_food_by_id(feed_id)
-        array = []
         data, nutrient = self.service_get_food_info_by_data(feed_foods)
 
         session = SessionLocal()
