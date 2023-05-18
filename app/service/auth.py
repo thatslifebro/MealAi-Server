@@ -40,6 +40,10 @@ class AuthService:
         access_token = create_access_token(user.user_id)
         refresh_token = create_refresh_token(user.user_id)
 
+        pre_refresh_token = redis.get(user.user_id)
+        if pre_refresh_token:
+            redis.sadd("blacklist", pre_refresh_token.decode())
+
         redis.set(
             name=str(user.user_id),
             value=refresh_token,
