@@ -6,7 +6,6 @@ import jwt
 from jwt.exceptions import *
 from starlette.config import Config
 
-from app.dao.auth import *
 from app.dao.user import *
 from app.dto.auth.AuthRequest import *
 from app.dto.auth.AuthResponse import *
@@ -51,7 +50,6 @@ class AuthService:
         return res
 
     async def logout(self, user: LogoutRequest, refresh_token: str, redis):
-        await delete_refresh_token(user_id=user.user_id)
         redis.sadd("blacklist", user.access_token)
         redis.sadd("blacklist", refresh_token)
         return None
