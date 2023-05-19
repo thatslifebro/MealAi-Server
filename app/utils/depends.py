@@ -1,11 +1,13 @@
-from fastapi import Depends, Header, HTTPException
 from typing import Optional
+
 import jwt
+from fastapi import Depends, Header
 from jwt.exceptions import *
 from starlette.config import Config
-from app.error.auth import *
-from app.dto.auth.AuthRequest import *
+
 from app.database.token import Redis, get_redis
+from app.dto.auth.AuthRequest import *
+from app.error.auth import *
 
 config = Config(".env")
 

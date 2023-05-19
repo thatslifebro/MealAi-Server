@@ -1,8 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
-
 from starlette.config import Config
-from datetime import datetime
 
 config = Config(".env")
 
@@ -14,21 +12,14 @@ client_s3 = boto3.client(
 )
 
 
-def upload_file(file, user_id):
+def upload_file(file):
     try:
-        name = (
-            str(user_id)
-            + "/"
-            + str(datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S"))
-            + "-"
-            + file.filename
-        )
         client_s3.upload_fileobj(
             file.file,
             "elice-8team-s3",
-            name,
+            file.filename,
         )
-        return name
+        return file.filename
     except ClientError as e:
         print(f"Credential error => {e}")
     except Exception as e:

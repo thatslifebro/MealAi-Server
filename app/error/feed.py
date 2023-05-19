@@ -1,9 +1,6 @@
 from app.error.base import CustomException
 
 
-from app.error.base import CustomException
-
-
 class NoFeedIdException(CustomException):
     status = 404
     error_code = 3001
@@ -26,7 +23,21 @@ class UpdateFeedException(CustomException):
 
 
 class UnauthorizedFeedException(CustomException):
-    status = 401
+    status = 403
     error_code = 3004
     error_name = "UnauthorizedFeedError"
     message = "해당 피드의 권한이 없습니다."
+
+
+class PostException(CustomException):
+    status = 500
+    error_code = 3005
+    error_name = "FeedPostServerError"
+    message = "서버 내부 에러 입니다."
+
+
+class FailedPredictionException(CustomException):
+    status = 400
+    error_code = 3014
+    error_name = "FAILED_PREDICTION"
+    message = "이미지 분석에 실패했습니다."

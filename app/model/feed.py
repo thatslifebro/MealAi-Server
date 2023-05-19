@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import (
     Boolean,
     Column,
@@ -9,10 +11,10 @@ from sqlalchemy import (
     Numeric,
     Enum,
 )
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import VARCHAR
-import datetime
-from app.database.database import Base, engine
+from sqlalchemy.orm import relationship
+
+from app.database.database import Base
 from app.dto.feed.FeedRequest import MealTimeEnum
 
 

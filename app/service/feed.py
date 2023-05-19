@@ -1,13 +1,14 @@
-import datetime
-from fastapi import File, UploadFile
+from datetime import datetime
+
+from fastapi import File
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.dao.feed import *
-from app.dao.like import get_feed_likes_user, delete_likes
+from app.dao.like import get_feed_likes_user, delete_likes, get_feed_likes
 from app.dao.user import read_by_user_id, get_user_daily_nutrient
-from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
-
-from app.error.feed import *
 from app.database.database import SessionLocal
-
+from app.dto.feed.FeedRequest import PostFeed, PatchFeedData
+from app.error.feed import *
 from app.utils.predict import *
 
 
@@ -16,6 +17,16 @@ class FeedService:
         pass
 
     def service_get_food_info_by_data(self, feed_food_data):
+        if not feed_food_data:
+            return (
+                [],
+                {
+                    "kcal": 0,
+                    "carbohydrate": 0,
+                    "protein": 0,
+                    "fat": 0,
+                },
+            )
         kcal = 0
         carbohydrate = 0
         protein = 0
@@ -122,9 +133,6 @@ class FeedService:
         array = []
 
         for feed in feeds:
-            if not feed.open and feed.user_id != user_id:
-                continue
-
             res = await self.form_feed_res(feed, user_id)
             res.update({"user_daily_nutrient": None})
 
@@ -140,9 +148,10 @@ class FeedService:
 
         # contents = await file.read()
         image_data = await predict_image(file)
-        image_url = image_data["origin"]["image_key"]
+        image_url = image_data["origin"]["image_key"] + ".png"
 
         user = await read_by_user_id(user_id)
+
         post_feed_data = {
             "image_url": image_url,
             "meal_time": req["meal_time"],
@@ -158,34 +167,40 @@ class FeedService:
         }
 
         # 분석한 이미지를 여기에 저장해야함
+        session = SessionLocal()
         try:
-            session = SessionLocal()
             post_feed(session, post_feed_data)
+
             feed_id = get_recent_post_id(session)
+
             foods_data = []
 
             for crop in image_data["crops"]:
                 food_data = get_food_info_by_id(crop["food_id"])
-
+                crop_url = crop["image_key"] + ".png"
                 foods_data.append(
                     {
                         "food_id": food_data.food_id,
-                        "image_url": crop["image_key"],
+                        "image_url": crop_url,
                         "weight": food_data.weight,
                         "is_deleted": 0,
                         "feed_id": feed_id,
                     }
                 )
-
+            check_duplicate_food = []
             for food in foods_data:
+                if food["food_id"] in check_duplicate_food:
+                    continue
+                check_duplicate_food.append(food["food_id"])
                 insert_feed_food(session, feed_id, food)
-
-            session.commit()
+                session.commit()
+                session.close()
         except SQLAlchemyError:
             session.rollback()
-            raise UpdateFeedException
+            session.close()
+            raise PostException
 
-        return "ok"
+        return feed_id
 
     def service_delete_feed(self, feed_id: int, user_id):
         feed_data = get_feed_by_id(feed_id)
@@ -194,17 +209,22 @@ class FeedService:
         elif not match_feed_user(feed_id, user_id):
             raise UnauthorizedFeedException
 
+        feed_foods = get_feed_food_by_id(feed_id)
+        data, nutrient = self.service_get_food_info_by_data(feed_foods)
+
         session = SessionLocal()
         try:
             delete_feed_food(session, feed_id)
             delete_likes(session, feed_id)
             delete_feed(session, feed_id)
             session.commit()
+            session.close()
         except SQLAlchemyError:
             session.rollback()
+            session.close()
             raise DeleteFeedException
 
-        return "ok"
+        return data
 
     async def service_patch_feed(self, feed_id: int, req: PatchFeedData, user_id: int):
         if not match_feed_user(feed_id, user_id):
@@ -215,7 +235,7 @@ class FeedService:
             # "meal_time": req.meal_time,
             "open": req.open,
             # "date": req.date,
-            "updated_at": datetime.datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
         }
         foods_data = req.foods
 
@@ -224,13 +244,15 @@ class FeedService:
             patch_feed(session, patch_feed_data)
             delete_feed_food(session, feed_id)
             for food_data in foods_data:
-                insert_feed_food(session, feed_id, food_data)
+                insert_feed_food_patch(session, feed_id, food_data)
             session.commit()
+            session.close()
         except SQLAlchemyError:
             session.rollback()
+            session.close()
             raise UpdateFeedException
 
-        return await self.service_get_feed_by_id(feed_id)
+        return await self.service_get_feed_by_id(feed_id, user_id)
 
     def service_search_food_by_name(self, food_name: str):
         return search_food_by_name(food_name)

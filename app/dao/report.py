@@ -1,7 +1,5 @@
 from app.database.database import engine
 from sqlalchemy.sql import text
-from .like import get_feed_likes
-from .feed import get_feed_food_by_id, get_food_info_by_id
 
 
 def get_feeds_of_latest_week(user_id: int):

@@ -1,13 +1,16 @@
-from app.database.database import engine
 from sqlalchemy.sql import text
+
+from app.database.database import engine
 from app.dto.user.UserRequest import *
-from app.dto.user.UserResponse import *
 
 
 async def create(user: CreateUserRequest):
     with engine.connect() as conn:
         statement = text(
-            """INSERT INTO User (email, password, gender, age_group, nickname, goal) VALUES (:email, :password, :gender, :age_group, :nickname, :goal)"""
+            """
+            INSERT INTO User (email, password, gender, age_group, nickname, goal) 
+            VALUES (:email, :password, :gender, :age_group, :nickname, :goal)
+            """
         )
 
         values = {
@@ -21,7 +24,21 @@ async def create(user: CreateUserRequest):
 
         conn.execute(statement, values)
         conn.commit()
-        return None
+
+        statement = text(
+            """
+            SELECT * FROM User AS U
+            LEFT JOIN DailyNutrient DN 
+            on U.age_group = DN.age_group
+            WHERE email = :email AND
+            DN.gender = :gender;
+            """
+        )
+        res = conn.execute(
+            statement, {"email": user.email, "gender": user.gender.value}
+        )
+        user = res.fetchone()
+        return user
 
 
 async def read_by_email(email: str):
@@ -29,8 +46,6 @@ async def read_by_email(email: str):
         statement = text("""SELECT * FROM User WHERE email = :email""")
         res = conn.execute(statement, {"email": email})
         user = res.fetchone()
-        if not user:
-            return None
         return user
 
 
@@ -39,8 +54,6 @@ async def read_by_user_id(user_id: int):
         statement = text("""SELECT * FROM User WHERE user_id = :user_id""")
         res = conn.execute(statement, {"user_id": user_id})
         user = res.fetchone()
-        if not user:
-            return None
         return user
 
 
@@ -64,9 +77,9 @@ async def get_user_daily_nutrient(user_id: int):
             "user_id": user_id,
         }
 
-        result = conn.execute(statement, values).mappings().first()
+        user = conn.execute(statement, values).mappings().first()
 
-        return result
+        return user
 
 
 async def create_user_daily_nutrient(user_id: int, nutrient: list):
@@ -123,7 +136,20 @@ async def update_info(user: EditUserInfoRequest, user_id):
 
         conn.execute(statement, values)
         conn.commit()
-        return None
+
+        statement = text(
+            """
+            SELECT * FROM User AS U
+            LEFT JOIN DailyNutrient DN 
+            on U.age_group = DN.age_group
+            WHERE user_id = :user_id AND
+            DN.gender = :gender;
+            """
+        )
+        res = conn.execute(statement, {"user_id": user_id, "gender": user.gender.value})
+        user = res.fetchone()
+
+        return user
 
 
 async def update_password(password: bytes, user_id: int):

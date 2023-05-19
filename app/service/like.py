@@ -1,4 +1,3 @@
-from app.dao.feed import get_feed_food_by_id, get_food_info_by_id
 from app.dao.like import *
 from app.service.feed import *
 
@@ -18,7 +17,7 @@ class LikeService:
         else:
             cancel_likes(feed_id, user_id)
 
-        return "ok"
+        return "okok"
 
     async def service_get_my_likes_feeds(self, page: int, per_page: int, user_id: int):
         feeds, feeds_num = get_my_likes_feeds(

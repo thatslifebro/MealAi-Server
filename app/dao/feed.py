@@ -1,6 +1,3 @@
-from sqlalchemy.exc import SQLAlchemyError
-
-from app.dao.like import get_feed_likes
 from app.database.database import engine
 from sqlalchemy.sql import text
 
@@ -42,7 +39,9 @@ def get_feeds_num_by_goal(goal):
         else:
             data = {"goal": goal}
             statement = text(
-                """SELECT COUNT(*) AS feeds_num FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal"""
+                """SELECT COUNT(*) AS feeds_num 
+                FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id 
+                WHERE User.goal=:goal"""
             )
             result = conn.execute(statement, data)
             row = result.mappings().first()
@@ -56,11 +55,14 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
             data = {"skip": skip, "limit": limit}
             if filter == "popularity":
                 statement = text(
-                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id ORDER BY L.cou DESC, created_at DESC LIMIT :skip, :limit"""
+                    """SELECT F.* FROM Feed AS F 
+                    LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id 
+                    WHERE F.user_id!=-1 AND open=1 ORDER BY L.cou DESC, created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
-                    """SELECT * FROM Feed ORDER BY created_at DESC LIMIT :skip, :limit"""
+                    """SELECT * FROM Feed WHERE Feed.user_id!=-1 AND open=1 
+                    ORDER BY created_at DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
 
         else:
@@ -72,11 +74,17 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
             }
             if filter == "popularity":
                 statement = text(
-                    """SELECT F.* FROM Feed AS F LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id LEFT JOIN User ON F.user_id=User.user_id WHERE User.goal=:goal ORDER BY L.cou DESC, created_at DESC LIMIT :skip, :limit"""
+                    """SELECT F.* FROM Feed AS F 
+                    LEFT JOIN (SELECT COUNT(*) as cou,feed_id FROM Likes GROUP BY feed_id) AS L ON F.feed_id =L.feed_id 
+                    LEFT JOIN User ON F.user_id=User.user_id 
+                    WHERE User.goal=:goal AND F.user_id!=-1 AND open=1 
+                    ORDER BY L.cou DESC, F.created_at DESC , F.feed_id DESC LIMIT :skip, :limit"""
                 )
             else:
                 statement = text(
-                    """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id WHERE User.goal=:goal ORDER BY :filter_data DESC LIMIT :skip, :limit"""
+                    """SELECT Feed.* FROM Feed LEFT JOIN User ON Feed.user_id=User.user_id 
+                    WHERE User.goal=:goal AND Feed.user_id!=-1 AND open=1 
+                    ORDER BY :filter_data DESC, feed_id DESC LIMIT :skip, :limit"""
                 )
 
         feeds_num = get_feeds_num_by_goal(goal)
@@ -88,7 +96,8 @@ def get_feeds_by_skip_limit(goal, filter, skip: int = 0, limit: int = 10):
 
 def post_feed(session, post_feed_data):
     statement = text(
-        """INSERT INTO Feed VALUES(:feed_id,:user_id,:image_url,:thumbnail_url,:meal_time,:date,:open,:created_at,:updated_at,:is_deleted)"""
+        """INSERT INTO Feed 
+        VALUES(:feed_id,:user_id,:image_url,:thumbnail_url,:meal_time,:date,:open,:created_at,:updated_at,:is_deleted)"""
     )
 
     session.execute(statement, post_feed_data)
@@ -106,6 +115,21 @@ def insert_feed_food(session, feed_id, food_data):
         "food_id": food_data["food_id"],
         "image_url": food_data["image_url"],
         "weight": food_data["weight"],
+        "is_deleted": 0,
+        "feed_id": feed_id,
+    }
+    statement = text(
+        """INSERT INTO FeedFood VALUES(:feed_id,:image_url,:food_id,:weight,:is_deleted)"""
+    )
+
+    session.execute(statement, post_food_data)
+
+
+def insert_feed_food_patch(session, feed_id, food_data):
+    post_food_data = {
+        "food_id": food_data.food_id,
+        "image_url": food_data.image_url,
+        "weight": food_data.weight,
         "is_deleted": 0,
         "feed_id": feed_id,
     }
@@ -150,8 +174,24 @@ def match_feed_user(feed_id: int, user_id: int):
 def search_food_by_name(name: str):
     with engine.connect() as conn:
         data = {"name": "%" + name + "%"}
-        statement = text(
-            """SELECT food_id, name, weight FROM FoodInfo WHERE name LIKE :name """
-        )
+        statement = text("""SELECT * FROM FoodInfo WHERE name LIKE :name """)
         result = conn.execute(statement, data)
         return result.mappings().all()
+
+
+def get_food_by_id(food_id: int):
+    with engine.connect() as conn:
+        data = {"food_id": food_id}
+        statement = text("""SELECT * FROM FoodInfo WHERE food_id = :food_id """)
+        result = conn.execute(statement, data)
+        food = result.mappings().first()
+        food_info = {
+            "food_id": food.food_id,
+            "name": food.name,
+            "weight": food.weight,
+            "kcal": round(food.kcal),
+            "carbohydrate": round(food.carbohydrate),
+            "protein": round(food.protein),
+            "fat": round(food.fat),
+        }
+        return food_info

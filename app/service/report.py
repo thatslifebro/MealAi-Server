@@ -1,6 +1,8 @@
-from app.dao.like import get_feed_likes_user
-from app.dao.report import *
+import datetime
+
 from app.dao.feed import *
+from app.dao.like import get_feed_likes_user, get_feed_likes
+from app.dao.report import *
 from app.dao.user import get_user_daily_nutrient
 from app.service.feed import FeedService
 from app.service.user import UserService
@@ -11,6 +13,8 @@ class ReportService:
 
     async def service_get_report_week(self, week: int, user_id: int):
         latest_week = get_feeds_of_latest_week(user_id)
+        if latest_week is None:
+            return None
         search_week = latest_week
         for i in range(week - 1):
             search_week = get_previous_week(user_id, search_week)
@@ -72,13 +76,27 @@ class ReportService:
             "protein": round(user_daily_goal["protein"] * 7),
             "fat": round(user_daily_goal["fat"] * 7),
         }
+        user_daily_goal_round = {
+            "kcal": round(user_daily_goal["kcal"]),
+            "carbohydrate": round(user_daily_goal["carbohydrate"]),
+            "protein": round(user_daily_goal["protein"]),
+            "fat": round(user_daily_goal["fat"]),
+        }
+
+        # start_of_week =
+
+        d = "2023-W" + str(search_week)
+        start_of_week = datetime.datetime.strptime(d + "-1", "%Y-W%W-%w")
+        end_of_week = datetime.datetime.strptime(d + "-0", "%Y-W%W-%w")
 
         return {
             "goal": user_goal,
             "weekly_goal": user_weekly_goal,
             "weekly_nutrient": weekly_nutrient,
-            "daily_goal": user_daily_goal,
+            "daily_goal": user_daily_goal_round,
             "daily_nutrient": nutrient,
+            "start_of_week": str(start_of_week).split(" ")[0],
+            "end_of_week": str(end_of_week).split(" ")[0],
         }
 
     async def service_get_report_history(self, week: int, user_id: int):
@@ -86,6 +104,9 @@ class ReportService:
         user_goal = user_info.goal
 
         latest_week = get_feeds_of_latest_week(user_id)
+        if latest_week is None:
+            return None
+
         search_week = latest_week
         for i in range(week - 1):
             search_week = get_previous_week(user_id, search_week)
@@ -93,6 +114,8 @@ class ReportService:
         feeds = get_feeds_by_week(user_id, search_week)
 
         array = [[] for i in range(7)]
+
+        d = "2023-W" + str(search_week)
 
         for feed in feeds:
             likes = get_feed_likes(feed.feed_id)
@@ -120,6 +143,36 @@ class ReportService:
             array[feed.date.weekday()].append(res)
 
             # array.append(res)
+        for i in range(7):
+            if not array[i]:
+                if i == 6:
+                    array[i].append(
+                        {
+                            "date": str(
+                                datetime.datetime.strptime(
+                                    d + "-" + str(i - 6), "%Y-W%W-%w"
+                                )
+                            ).split(" ")[0],
+                            "kcal": 0,
+                            "carbohydrate": 0,
+                            "protein": 0,
+                            "fat": 0,
+                        }
+                    )
+                else:
+                    array[i].append(
+                        {
+                            "date": str(
+                                datetime.datetime.strptime(
+                                    d + "-" + str(i + 1), "%Y-W%W-%w"
+                                )
+                            ).split(" ")[0],
+                            "kcal": 0,
+                            "carbohydrate": 0,
+                            "protein": 0,
+                            "fat": 0,
+                        }
+                    )
 
         nutrient = []
         for i in range(7):
@@ -141,5 +194,11 @@ class ReportService:
             )
 
         user_daily_goal = await get_user_daily_nutrient(user_id)
+        user_daily_goal_round = {
+            "kcal": round(user_daily_goal["kcal"]),
+            "carbohydrate": round(user_daily_goal["carbohydrate"]),
+            "protein": round(user_daily_goal["protein"]),
+            "fat": round(user_daily_goal["fat"]),
+        }
 
-        return {"goal": user_daily_goal, "nutrient": nutrient, "data": array}
+        return {"goal": user_daily_goal_round, "nutrient": nutrient, "data": array}
