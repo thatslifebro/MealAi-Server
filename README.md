@@ -1,4 +1,4 @@
-![image](https://github.com/seoziyeong/MealAi_README/assets/119486106/519d2f56-c633-4f4b-bd87-33b09a949de0)
+![image](https://github.com/Elice-8Team/MealAi-Server/blob/main/MainImage.png?raw=true)
 
 # :rice: 나만의 맞춤 AI 영양사, MealAi
 
