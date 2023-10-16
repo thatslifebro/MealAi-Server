@@ -1,8 +1,11 @@
-![image](https://github.com/seoziyeong/MealAi_README/assets/119486106/519d2f56-c633-4f4b-bd87-33b09a949de0)
 
 # :rice: 나만의 맞춤 AI 영양사, MealAi
 
 - AI 기반 식단 분석 서비스
+
+
+## 나의 역할
+백엔드 : DB 설계, 피드 API(CRUD, 좋아요, 카테고리), 리포트 API 생성, 이미지 처리(AWS S3)
 
 ## :books: 프로젝트 구성
 
